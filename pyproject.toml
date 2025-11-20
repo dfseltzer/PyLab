@@ -1,0 +1,28 @@
+[build-system]
+requires = [
+    "setuptools >= 61.0"
+]
+build-backend = "setuptools.build_meta"
+[project]
+name = "pylab"
+description = "Python library for electronics labs"
+license-files = ["LICENSE"]
+keywords = ["electrical", "EE", "math", "symbolic", "engineering", "power"]
+dynamic = ["version", "readme"]
+requires-python = ">= 3.13"
+dependencies = []
+
+[tool.setuptools]
+packages = ["pylab"]
+
+[tool.setuptools.package-data]
+pyee=["data/*"]
+
+[tool.setuptools.dynamic]
+version = {attr = "pylab.__version__"}  # any module attribute compatible with ast.literal_eval
+readme = {file = ["README.md"]}
+
+[tool.pylance]
+typeCheckingMode = "standard"
+verboseOutput = "true"
+extraPaths = [".", "./pylab", "./pylab", "./pylab/*"]
