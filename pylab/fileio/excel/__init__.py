@@ -37,3 +37,5 @@ except Exception as e:
         "Try running the post-install script:\n"
         "    python Scripts/pywin32_postinstall.py -install\n\n"
         f"Error details: {str(e)}") from e
+
+from .workbook import Workbook
