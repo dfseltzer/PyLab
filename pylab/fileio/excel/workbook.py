@@ -31,7 +31,8 @@ class Workbook:
             self.workbook = Application.create_workbook(self.filepath)
         
         self._is_open = True
-        return self.workbook
+        self.sheet = self.list_sheets()[0]
+        return self._is_open
     
     def save(self):
         """Save the workbook."""

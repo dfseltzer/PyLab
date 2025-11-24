@@ -9,7 +9,7 @@ import atexit
 import logging
 logger = logging.getLogger(__name__)
 
-class Application:
+class _app_singleton:
     """
     Singleton-like class to manage a single Excel application instance.
     Reuses the same Excel instance for all workbook operations.
@@ -85,28 +85,4 @@ class Application:
         """Get number of currently open workbooks."""
         return self._excel.Workbooks.Count
 
-
-# Alternative: Context manager for individual workbooks
-class ExcelWorkbook:
-    """
-    Context manager for working with individual workbooks.
-    Uses the shared Excel application instance.
-    """
-    
-    def __init__(self, filepath, create_new=False, read_only=False):
-        self.filepath = filepath
-        self.create_new = create_new
-        self.read_only = read_only
-        self.excel_app = Application()
-        self.workbook = None
-    
-    def __enter__(self):
-        if self.create_new:
-            self.workbook = self.excel_app.create_workbook(self.filepath)
-        else:
-            self.workbook = self.excel_app.open_workbook(self.filepath, self.read_only)
-        return self.workbook
-    
-    def __exit__(self, exc_type, exc_val, exc_tb):
-        if self.workbook:
-            self.excel_app.close_workbook(self.workbook, save_changes=True)
+Application = _app_singleton()
