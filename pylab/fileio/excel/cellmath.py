@@ -2,6 +2,21 @@
 Utilities for converting between Excel cell addresses and row/column indices.
 """
 
+def validate_address(row, col):
+    """
+    Validate that row and column are positive integers.
+    
+    Args:
+        row: Row number to validate
+        col: Column number to validate
+    
+    Raises:
+        ValueError: If row or col are not positive integers
+    """
+    if not isinstance(row, int) or row < 1:
+        raise ValueError("Row must be a positive integer (1-indexed)")
+    if not isinstance(col, int) or col < 1:
+        raise ValueError("Column must be a positive integer (1-indexed)")
 
 def to_address(row, col, row2=None, col2=None):
     """Convert row/column indices to Excel address string."""

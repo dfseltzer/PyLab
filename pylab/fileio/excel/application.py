@@ -16,7 +16,7 @@ class _app_singleton:
     """
     
     _instance = None
-    _excel = None
+    _app = None
     
     def __new__(cls):
         if cls._instance is None:
@@ -24,33 +24,33 @@ class _app_singleton:
         return cls._instance
     
     def __init__(self):
-        if self._excel is None:
-            self._excel = win32com.client.Dispatch("Excel.Application")
-            self._excel.DisplayAlerts = False  # Suppress prompts
+        if self._app is None:
+            self._app = win32com.client.Dispatch("Excel.Application")
+            self._app.DisplayAlerts = False  # Suppress prompts
             atexit.register(self.quit)
     
     @property
     def app(self):
         """Get the Excel application instance."""
-        return self._excel
-    
+        if self._app is None:
+            raise RuntimeError("Excel application is not running. It may have been closed or not initialized.")
+        return self._app
+
     @property
     def visible(self):
         """Get visibility state."""
-        return self._excel.Visible
+        return self.app.Visible
     
     @visible.setter
     def visible(self, value):
         """Set visibility of Excel application."""
-        self._excel.Visible = value
+        self.app.Visible = value
     
     def create_workbook(self, filepath=None):
-        workbook = self._excel.Workbooks.Add()
-        
+        workbook = self.app.Workbooks.Add()
         if filepath:
             workbook.SaveAs(os.path.abspath(filepath))
             logger.info(f"Created new Excel file: {filepath}")
-        
         return workbook
     
     def open_workbook(self, filepath, read_only=False):
@@ -58,7 +58,7 @@ class _app_singleton:
         Open an existing workbook.
         """
         abs_path = os.path.abspath(filepath)
-        workbook = self._excel.Workbooks.Open(abs_path, ReadOnly=read_only)
+        workbook = self.app.Workbooks.Open(abs_path, ReadOnly=read_only)
         logger.info(f"Opened Excel file: {filepath}")
         return workbook
     
@@ -73,16 +73,16 @@ class _app_singleton:
     
     def quit(self):
         """Quit the Excel application and clean up."""
-        if self._excel:
+        if self._app:
             try:
-                self._excel.Quit()
-                self._excel = None
+                self._app.Quit()
+                self._app = None
                 logger.info("Excel application closed")
             except Exception as e:
                 logger.error(f"Error quitting Excel: {e}")
     
     def workbook_count(self):
         """Get number of currently open workbooks."""
-        return self._excel.Workbooks.Count
+        return self.app.Workbooks.Count
 
 Application = _app_singleton()
