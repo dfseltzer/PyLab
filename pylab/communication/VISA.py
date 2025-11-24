@@ -6,8 +6,8 @@ import pyvisa
 import logging
 logger = logging.getLogger(__name__)
 
-from .Connection import Connection
-from .Connection import Status
+from .connection import Connection
+from .connection import Status
 
 # Update this to change the default resource manager
 RESOURCEMANAGER = '@py'
