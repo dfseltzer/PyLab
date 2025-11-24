@@ -66,15 +66,15 @@ class VISAConnection(Connection):
         
         self._timeout = 5
         
-        self.rm = ResourceManager()
-        self.resource = None
+        self._pyvisa_manager = ResourceManager()
+        self._pyvisa_resource = None
 
     def open(self) -> Status:
         logger.info(f"{self}: Opening...")
-        self.resource = self.rm.open(self.address)
+        self._pyvisa_resource = self._pyvisa_manager.open(self.address)
         self.timeout = self._timeout
         self._status = Status.OPEN
-        logger.info(f"{self}: Opened as {self.resource}... testing connection")
+        logger.info(f"{self}: Opened as {self._pyvisa_resource}... testing connection")
         resp = self.query("*IDN?")
         if resp is None:
             self._status = Status.UNKNOWN
@@ -84,14 +84,14 @@ class VISAConnection(Connection):
         return self._status
 
     def close(self) -> Status:
-        if self.resource is not None:
+        if self._pyvisa_resource is not None:
             try:
-                self.resource.close()
+                self._pyvisa_resource.close()
                 self._status = Status.CLOSED
             except Exception as e:
                 logger.error(f"Failed to close {self} with exception {e}. Changing status to UNKNOWN.")
                 self._status = Status.UNKNOWN
-            self.resource = None
+            self._pyvisa_resource = None
             return self._status
         else:
             logger.warning(f"Tried to close connection that does not exist: {self}")
@@ -111,7 +111,7 @@ class VISAConnection(Connection):
             return None
         
         try:
-            response = self.resource.read()
+            response = self._pyvisa_resource.read()
             return response.strip()
         except Exception as e:
             self._status = Status.UNKNOWN
@@ -124,7 +124,7 @@ class VISAConnection(Connection):
             return False
         
         try:
-            self.resource.write(command)
+            self._pyvisa_resource.write(command)
             return True
         except Exception as e:
             self._status = Status.UNKNOWN
@@ -132,8 +132,8 @@ class VISAConnection(Connection):
             return False
     
     def query(self, command) -> str | None:
-        if self and (self.resource is not None):
-            return self.resource.query(command)
+        if self and (self._pyvisa_resource is not None):
+            return self._pyvisa_resource.query(command)
         else:
             logger.error(f"{self}: Status is not open - unable to query.")
             return None
@@ -147,8 +147,8 @@ class VISAConnection(Connection):
         if val <= 0:
             raise ValueError(f"{self}: Timeout must be > 0")
         self._timeout = val
-        if self.resource is not None:
+        if self._pyvisa_resource is not None:
             try:
-                self.resource.timeout = self._timeout
+                self._pyvisa_resource.timeout = self._timeout
             except Exception as e:
                 logger.error(f"{self}: Failed to set timout value with {e}")
