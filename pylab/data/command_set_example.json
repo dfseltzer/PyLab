@@ -1,0 +1,87 @@
+{
+    "info": {
+        "device": "Example SCPI Device",
+        "notes": [
+            "'commands' is a dictionary where each key is a SCPI command string.",
+            "Each command has an ordered 'arguments' list (for set commands) and an ordered 'response' list (for query commands).",
+            "Each argument/response is an object with at least: 'type' (str, int, float, bool), 'required' (bool), and optionally 'default', 'values' (for enums), 'range' (for min/max), 'variadic' (for repeated args), and 'suffix' (for numeric suffixes).",
+            "If a command supports a numeric suffix, it should have 'numeric_suffix': true and 'suffix_argument' index.",
+            "If a command supports variadic arguments, the last argument should have 'variadic': true.",
+            "'help' provides a human-readable description of the command.",
+            "For query/set duality, use separate entries for e.g. 'VOLT' and 'VOLT?'."
+        ]
+    },
+    "commands": {
+        "INP:SHOR": {
+            "arguments": [
+                {"type": "bool", "required": true, "default": null}
+            ],
+            "help": "Set short circuit function state (0/OFF or 1/ON)"
+        },
+        "INP:SHOR?": {
+            "arguments": [],
+            "response": [
+                {"type": "bool"}
+            ],
+            "help": "Query short circuit function state (returns 0/OFF or 1/ON)"
+        },
+        "SOUR:FUNC": {
+            "arguments": [
+                {"type": "str", "values": ["VOLT", "CURR", "POW", "RES", "DYN", "LED", "IMP"], "required": true, "default": null}
+            ],
+            "help": "Set source function mode"
+        },
+        "SOUR:FUNC?": {
+            "arguments": [],
+            "response": [
+                {"type": "str", "values": ["VOLT", "CURR", "POW", "RES", "DYN", "LED", "IMP"]}
+            ],
+            "help": "Query source function mode"
+        },
+        "VOLT": {
+            "arguments": [
+                {"type": "int", "required": false, "default": 1, "range": [1, 4], "suffix": true},
+                {"type": "float", "required": true, "default": null, "range": [0, 60]}
+            ],
+            "numeric_suffix": true,
+            "suffix_argument": 0,
+            "help": "Set voltage for a given channel (e.g., VOLT1 12.0)"
+        },
+        "VOLT?": {
+            "arguments": [
+                {"type": "int", "required": false, "default": 1, "range": [1, 4], "suffix": true}
+            ],
+            "numeric_suffix": true,
+            "suffix_argument": 0,
+            "response": [
+                {"type": "float"}
+            ],
+            "help": "Query voltage for a given channel (e.g., VOLT1?)"
+        },
+        "DYN:SEQ": {
+            "arguments": [
+                {"type": "float", "required": true, "default": null, "variadic": true}
+            ],
+            "help": "Set dynamic sequence with variable number of steps (DYN:SEQ 1.0,2.0,3.0,...)"
+        },
+        "OUTP": {
+            "arguments": [
+                {"type": "bool", "required": false, "default": "OFF"}
+            ],
+            "help": "Set or query output state"
+        },
+        "CHAN:SEL": {
+            "arguments": [
+                {"type": "int", "required": true, "default": null, "range": [1, 4]}
+            ],
+            "help": "Select channel"
+        },
+        "MEAS:VOLT?": {
+            "arguments": [],
+            "response": [
+                {"type": "float"}
+            ],
+            "help": "Query the average DC voltage at the load input"
+        }
+    }
+}
