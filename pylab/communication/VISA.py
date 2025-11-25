@@ -61,14 +61,12 @@ class ResourceManager(object):
         return resource
 
 class VISAConnection(Connection):
-    def __init__(self, name, address, timeout=5, *args, **kwargs) -> None:
-        super().__init__(name, address, *args, **kwargs)
-        
-        self._timeout = 5
-        
+    def __init__(self, name, address, timeout=5) -> None:
+        super().__init__(name, address)
+        self._timeout = timeout
         self._pyvisa_manager = ResourceManager()
         self._pyvisa_resource = None
-
+    
     def open(self) -> Status:
         logger.info(f"{self}: Opening...")
         self._pyvisa_resource = self._pyvisa_manager.open(self.address)
@@ -105,7 +103,7 @@ class VISAConnection(Connection):
         self.open()
         return self.status
 
-    def read(self, *args, **kwargs) -> str | None:
+    def read(self) -> str | None:
         if not self:
             logger.error(f"{self}: Unable to write to connection... status is {self.status}")
             return None
@@ -152,3 +150,48 @@ class VISAConnection(Connection):
                 self._pyvisa_resource.timeout = self._timeout
             except Exception as e:
                 logger.error(f"{self}: Failed to set timout value with {e}")
+
+class VISAConnectionBlank(Connection):
+    def __init__(self, name, address, timeout=5) -> None:
+        super().__init__(name, address)
+        self._timeout = timeout
+        self._status = Status.OPEN
+        logger.info(f"[BLANK] Created VISAConnectionBlank for {name} at {address}")
+
+    def open(self) -> Status:
+        logger.info(f"[BLANK] Open called for {self}")
+        self._status = Status.OPEN
+        return self._status
+
+    def close(self) -> Status:
+        logger.info(f"[BLANK] Close called for {self}")
+        self._status = Status.CLOSED
+        return self._status
+
+    def reset(self) -> Status:
+        logger.info(f"[BLANK] Reset called for {self}")
+        self._status = Status.OPEN
+        return self._status
+
+    def read(self, value) -> str | None:
+        logger.info(f"[BLANK] Read called for {self} with value={value}")
+        return value
+
+    def write(self, command) -> bool:
+        logger.info(f"[BLANK] Write called for {self} with command={command}")
+        return True
+
+    def query(self, *args) -> str | None:
+        logger.info(f"[BLANK] Query called for {self} with args={args}")
+        return args[1] if len(args) > 1 else None
+
+    @property
+    def timeout(self) -> int | float:
+        return self._timeout
+
+    @timeout.setter
+    def timeout(self, val):
+        if val <= 0:
+            raise ValueError(f"{self}: Timeout must be > 0")
+        self._timeout = val
+        logger.info(f"[BLANK] Timeout set to {val} for {self}")

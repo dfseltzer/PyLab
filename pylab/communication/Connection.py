@@ -15,7 +15,7 @@ class Status(Enum):
         return self == Status.OPEN
 
 class Connection(object):
-    def __init__(self, name, address, *args, **kwargs) -> None:
+    def __init__(self, name, address) -> None:
         self._status = Status.UNKNOWN
         self.name = name
         self.address = address

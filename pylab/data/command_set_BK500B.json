@@ -1,0 +1,618 @@
+{
+  "info": {
+    "device":"BK Precision 8500B Series Electronic Load",
+    "description": "Parameters are stored as dictionaries mapping parameter names to their properties.",
+    "notes": [
+      "For query commands (indicated by '?' suffix), parameters dictionary is typically empty",
+      "Boolean types accept: 0, 1, ON, OFF",
+      "Numeric types may accept: MIN, MAX, or specific numeric values",
+      "String types are mode/option selections (case-insensitive)"
+    ]
+  },
+  "commands": {
+    "*CLS": {
+      "parameters": {},
+      "query": false,
+      "help": "Clear Status - Clears the Standard Event Register, Operation Event Register, Questionable Event Register, and Error Queue"
+    },
+    "*ESE": {
+      "parameters": {
+        "value": {"required": true, "type": "int"}
+      },
+      "query": true,
+      "help": "Event Enable - Programs the Standard Event Status Enable register bits (0 to 255)"
+    },
+    "*ESR?": {
+      "parameters": {},
+      "query": true,
+      "help": "Query the Standard Event Status Event register. Reading the register clears it"
+    },
+    "*IDN?": {
+      "parameters": {},
+      "query": true,
+      "help": "Identification query - Returns manufacturer, model, serial number, and firmware version"
+    },
+    "*OPC": {
+      "parameters": {},
+      "query": true,
+      "help": "Operation Complete - Sets OPC bit when all pending operations are complete"
+    },
+    "*PSC": {
+      "parameters": {
+        "state": {"required": true, "type": "bool"}
+      },
+      "query": true,
+      "help": "Power-on Status Clear - Controls service request generation on power-on (0/OFF or 1/ON)"
+    },
+    "*RCL": {
+      "parameters": {
+        "location": {"required": true, "type": "int"}
+      },
+      "query": false,
+      "help": "Recall - Restores electronic load to a previously stored state (0 to 9)"
+    },
+    "*RST": {
+      "parameters": {},
+      "query": false,
+      "help": "Reset - Resets the electronic load to factory-defined states"
+    },
+    "*SAV": {
+      "parameters": {
+        "location": {"required": true, "type": "int"}
+      },
+      "query": false,
+      "help": "Save - Stores the present state of the electronic load (0 to 99)"
+    },
+    "*SRE": {
+      "parameters": {
+        "value": {"required": true, "type": "int"}
+      },
+      "query": true,
+      "help": "Service Request Enable - Sets the Service Request Enable Register (0 to 255)"
+    },
+    "*STB?": {
+      "parameters": {},
+      "query": true,
+      "help": "Status Byte query - Reads the Status Byte register"
+    },
+    "*TST?": {
+      "parameters": {},
+      "query": true,
+      "help": "Self-test query - Returns 0 if passed, non-zero error code if failed"
+    },
+    "STAT:QUES:EVEN?": {
+      "parameters": {},
+      "query": true,
+      "help": "Query the questionable event register. Reading clears the register"
+    },
+    "STAT:QUES:COND?": {
+      "parameters": {},
+      "query": true,
+      "help": "Query the questionable condition register (real-time status)"
+    },
+    "STAT:QUES:ENAB": {
+      "parameters": {
+        "value": {"required": true, "type": "int"}
+      },
+      "query": true,
+      "help": "Set the questionable enable register (0 to 32767)"
+    },
+    "STAT:OPER:EVEN?": {
+      "parameters": {},
+      "query": true,
+      "help": "Query the operation event register. Reading clears the register"
+    },
+    "STAT:OPER:COND?": {
+      "parameters": {},
+      "query": true,
+      "help": "Query the operation condition register (real-time status)"
+    },
+    "STAT:OPER:ENAB": {
+      "parameters": {
+        "value": {"required": true, "type": "int"}
+      },
+      "query": true,
+      "help": "Set the operation enable register (0 to 65535)"
+    },
+    "MEAS:VOLT?": {
+      "parameters": {},
+      "query": true,
+      "help": "Query the average DC voltage at the load input"
+    },
+    "MEAS:VOLT:MAX?": {
+      "parameters": {},
+      "query": true,
+      "help": "Query the peak voltage at the load input"
+    },
+    "MEAS:VOLT:MIN?": {
+      "parameters": {},
+      "query": true,
+      "help": "Query the minimum voltage at the load input"
+    },
+    "MEAS:VOLT:PTP?": {
+      "parameters": {},
+      "query": true,
+      "help": "Query the voltage peak-to-peak value"
+    },
+    "MEAS:CURR?": {
+      "parameters": {},
+      "query": true,
+      "help": "Query the average DC current at the load input"
+    },
+    "MEAS:CURR:MAX?": {
+      "parameters": {},
+      "query": true,
+      "help": "Query the peak current at the load input"
+    },
+    "MEAS:CURR:MIN?": {
+      "parameters": {},
+      "query": true,
+      "help": "Query the minimum current at the load input"
+    },
+    "MEAS:CURR:PTP?": {
+      "parameters": {},
+      "query": true,
+      "help": "Query the current peak-to-peak value"
+    },
+    "MEAS:POW?": {
+      "parameters": {},
+      "query": true,
+      "help": "Query the average power at the load input"
+    },
+    "MEAS:RES?": {
+      "parameters": {},
+      "query": true,
+      "help": "Query the equivalent impedance"
+    },
+    "LED:VOLT": {
+      "parameters": {
+        "voltage": {"required": true, "type": "float"}
+      },
+      "query": true,
+      "help": "Set LED forward voltage Vo (0.001 to MAX V)"
+    },
+    "LED:CURR": {
+      "parameters": {
+        "current": {"required": true, "type": "float"}
+      },
+      "query": true,
+      "help": "Set LED rated current Io (0 to MAX A)"
+    },
+    "LED:RCO": {
+      "parameters": {
+        "coefficient": {"required": true, "type": "float"}
+      },
+      "query": true,
+      "help": "Set LED resistance coefficient Rd Coeff (0.001 to 1)"
+    },
+    "OCP": {
+      "parameters": {
+        "state": {"required": true, "type": "bool"}
+      },
+      "query": true,
+      "help": "Set OCP test state (0/OFF or 1/ON)"
+    },
+    "OCP:IST": {
+      "parameters": {
+        "current": {"required": true, "type": "float"}
+      },
+      "query": true,
+      "help": "Set OCP test start current (MIN to MAX A)",
+      "accepts_min_max": true
+    },
+    "OCP:IEND": {
+      "parameters": {
+        "current": {"required": true, "type": "float"}
+      },
+      "query": true,
+      "help": "Set OCP test end current (MIN to MAX A)",
+      "accepts_min_max": true
+    },
+    "OCP:STEP": {
+      "parameters": {
+        "steps": {"required": true, "type": "int"}
+      },
+      "query": true,
+      "help": "Set OCP test current step count (1 to 1000)"
+    },
+    "OCP:DWEL": {
+      "parameters": {
+        "time": {"required": true, "type": "float"}
+      },
+      "query": true,
+      "help": "Set OCP test single-step dwell time (0.00001 to 0.99999 s)"
+    },
+    "OCP:VTR": {
+      "parameters": {
+        "voltage": {"required": true, "type": "float"}
+      },
+      "query": true,
+      "help": "Set OCP trigger voltage level (MIN to MAX V)",
+      "accepts_min_max": true
+    },
+    "OCP:RES:OCP?": {
+      "parameters": {},
+      "query": true,
+      "help": "Query the OCP current value (A)"
+    },
+    "OCP:RES:PMAX?": {
+      "parameters": {},
+      "query": true,
+      "help": "Query PMAX value - Returns power, voltage, and current"
+    },
+    "PEAK": {
+      "parameters": {
+        "state": {"required": true, "type": "bool"}
+      },
+      "query": false,
+      "help": "Set peak test state (0/OFF or 1/ON)"
+    },
+    "PEAK:CLE": {
+      "parameters": {},
+      "query": false,
+      "help": "Clear peak test records"
+    },
+    "PEAK:VOLT:MAX?": {
+      "parameters": {},
+      "query": true,
+      "help": "Query the maximum recorded voltage during peak test"
+    },
+    "PEAK:VOLT:MIN?": {
+      "parameters": {},
+      "query": true,
+      "help": "Query the minimum recorded voltage during peak test"
+    },
+    "PEAK:CURR:MAX?": {
+      "parameters": {},
+      "query": true,
+      "help": "Query the maximum recorded current during peak test"
+    },
+    "PEAK:CURR:MIN?": {
+      "parameters": {},
+      "query": true,
+      "help": "Query the minimum recorded current during peak test"
+    },
+    "INP": {
+      "parameters": {
+        "state": {"required": true, "type": "bool"}
+      },
+      "query": true,
+      "help": "Set input on/off state (0/OFF or 1/ON)"
+    },
+    "INP:SHOR": {
+      "parameters": {
+        "state": {"required": true, "type": "bool"}
+      },
+      "query": true,
+      "help": "Set short circuit function state (0/OFF or 1/ON)"
+    },
+    "FUNC": {
+      "parameters": {
+        "mode": {"required": true, "type": "str"}
+      },
+      "query": true,
+      "help": "Select input mode: CURR, VOLT, POW, RES, DYN, LED, or IMP",
+      "valid_values": ["CURR", "VOLT", "POW", "RES", "DYN", "LED", "IMP"]
+    },
+    "MODE": {
+      "parameters": {
+        "mode": {"required": true, "type": "str"}
+      },
+      "query": true,
+      "help": "Select input mode (equivalent to FUNC): CURR, VOLT, POW, RES, DYN, LED, or IMP",
+      "valid_values": ["CURR", "VOLT", "POW", "RES", "DYN", "LED", "IMP"]
+    },
+    "VOLT:RANG": {
+      "parameters": {
+        "range": {"required": true, "type": "float"}
+      },
+      "query": true,
+      "help": "Set voltage range (MIN, MAX, or specific value in V)",
+      "accepts_min_max": true
+    },
+    "VOLT:RANG:AUTO": {
+      "parameters": {
+        "state": {"required": true, "type": "bool"}
+      },
+      "query": true,
+      "help": "Set voltage auto-range state (0/OFF or 1/ON)"
+    },
+    "VOLT:ON": {
+      "parameters": {
+        "voltage": {"required": true, "type": "float"}
+      },
+      "query": true,
+      "help": "Set voltage of sink current on (V)"
+    },
+    "VOLT:OFF": {
+      "parameters": {
+        "voltage": {"required": true, "type": "float"}
+      },
+      "query": true,
+      "help": "Set load start unloading voltage (MIN to MAX V)",
+      "accepts_min_max": true
+    },
+    "VOLT": {
+      "parameters": {
+        "voltage": {"required": true, "type": "float"}
+      },
+      "query": true,
+      "help": "Set voltage in CV mode (MIN to MAX V)",
+      "accepts_min_max": true
+    },
+    "CURR:RANG": {
+      "parameters": {
+        "range": {"required": true, "type": "float"}
+      },
+      "query": true,
+      "help": "Set current range (MIN, MAX, or specific value in A)",
+      "accepts_min_max": true
+    },
+    "CURR:SLEW": {
+      "parameters": {
+        "rate": {"required": true, "type": "float"}
+      },
+      "query": true,
+      "help": "Set slew rate for all current changes (MIN to MAX A/µs)",
+      "accepts_min_max": true
+    },
+    "CURR:SLEW:RISE": {
+      "parameters": {
+        "rate": {"required": true, "type": "float"}
+      },
+      "query": true,
+      "help": "Set current slew rate for positive transitions (MIN to MAX A/µs)",
+      "accepts_min_max": true
+    },
+    "CURR:SLEW:FALL": {
+      "parameters": {
+        "rate": {"required": true, "type": "float"}
+      },
+      "query": true,
+      "help": "Set current slew rate for negative transitions (MIN to MAX A/µs)",
+      "accepts_min_max": true
+    },
+    "CURR:PROT": {
+      "parameters": {
+        "current": {"required": true, "type": "float"}
+      },
+      "query": true,
+      "help": "Set current protection level (MIN to MAX A)",
+      "accepts_min_max": true
+    },
+    "CURR": {
+      "parameters": {
+        "current": {"required": true, "type": "float"}
+      },
+      "query": true,
+      "help": "Set current in CC mode (MIN to MAX A)",
+      "accepts_min_max": true
+    },
+    "POW:PROT": {
+      "parameters": {
+        "power": {"required": true, "type": "float"}
+      },
+      "query": true,
+      "help": "Set power protection level (MIN to MAX W)",
+      "accepts_min_max": true
+    },
+    "POW": {
+      "parameters": {
+        "power": {"required": true, "type": "float"}
+      },
+      "query": true,
+      "help": "Set power in CP mode (MIN to MAX W)",
+      "accepts_min_max": true
+    },
+    "RES": {
+      "parameters": {
+        "resistance": {"required": true, "type": "float"}
+      },
+      "query": true,
+      "help": "Set resistance in CR mode (MIN to MAX Ω)",
+      "accepts_min_max": true
+    },
+    "DYN:HIGH": {
+      "parameters": {
+        "level": {"required": true, "type": "float"}
+      },
+      "query": true,
+      "help": "Set high-level load current in dynamic mode (MIN to MAX A)",
+      "accepts_min_max": true
+    },
+    "DYN:HIGH:DWEL": {
+      "parameters": {
+        "time": {"required": true, "type": "float"}
+      },
+      "query": true,
+      "help": "Set duration of high-level load current in dynamic mode (MIN to MAX s)",
+      "accepts_min_max": true
+    },
+    "DYN:LOW": {
+      "parameters": {
+        "level": {"required": true, "type": "float"}
+      },
+      "query": true,
+      "help": "Set low-level load current in dynamic mode (MIN to MAX A)",
+      "accepts_min_max": true
+    },
+    "DYN:LOW:DWEL": {
+      "parameters": {
+        "time": {"required": true, "type": "float"}
+      },
+      "query": true,
+      "help": "Set duration of low-level load current in dynamic mode (MIN to MAX s)",
+      "accepts_min_max": true
+    },
+    "DYN:SLEW": {
+      "parameters": {
+        "rate": {"required": true, "type": "float"}
+      },
+      "query": true,
+      "help": "Set current slope in dynamic mode (MIN to MAX A/µs)",
+      "accepts_min_max": true
+    },
+    "DYN:SLEW:RISE": {
+      "parameters": {
+        "rate": {"required": true, "type": "float"}
+      },
+      "query": true,
+      "help": "Set current rising slope in dynamic mode (MIN to MAX A/µs)",
+      "accepts_min_max": true
+    },
+    "DYN:SLEW:FALL": {
+      "parameters": {
+        "rate": {"required": true, "type": "float"}
+      },
+      "query": true,
+      "help": "Set current falling slope in dynamic mode (MIN to MAX A/µs)",
+      "accepts_min_max": true
+    },
+    "DYN:MODE": {
+      "parameters": {
+        "mode": {"required": true, "type": "str"}
+      },
+      "query": true,
+      "help": "Set working mode in dynamic mode: CONT, PULS, or TOGG",
+      "valid_values": ["CONT", "PULS", "TOGG"]
+    },
+    "SYST:ERR?": {
+      "parameters": {},
+      "query": true,
+      "help": "Query the next error from the error queue. Returns error number and message"
+    },
+    "SYST:VERS?": {
+      "parameters": {},
+      "query": true,
+      "help": "Query the SCPI version (format YYYY.V)"
+    },
+    "SYST:SENS": {
+      "parameters": {
+        "state": {"required": true, "type": "bool"}
+      },
+      "query": true,
+      "help": "Control remote compensation function (0/OFF or 1/ON)"
+    },
+    "SYST:LOC": {
+      "parameters": {},
+      "query": false,
+      "help": "Set the load to local mode (front panel control enabled)"
+    },
+    "SYST:REM": {
+      "parameters": {},
+      "query": false,
+      "help": "Set the load to remote mode (most front panel buttons disabled except LOCAL)"
+    },
+    "SYST:RWL": {
+      "parameters": {},
+      "query": false,
+      "help": "Set the load to remote mode with all front panel buttons disabled"
+    },
+    "TIME:VOLT:LOW": {
+      "parameters": {
+        "voltage": {"required": true, "type": "float"}
+      },
+      "query": true,
+      "help": "Set start rising voltage for voltage rise time measurement (0 to MAX V)",
+      "accepts_min_max": true
+    },
+    "TIME:VOLT:HIGH": {
+      "parameters": {
+        "voltage": {"required": true, "type": "float"}
+      },
+      "query": true,
+      "help": "Set starting drop voltage for voltage fall time measurement (0 to MAX V)",
+      "accepts_min_max": true
+    },
+    "TIME:VOLT:UP?": {
+      "parameters": {},
+      "query": true,
+      "help": "Query the voltage rise time"
+    },
+    "TIME:VOLT:DOWN?": {
+      "parameters": {},
+      "query": true,
+      "help": "Query the voltage fall time"
+    },
+    "TIM": {
+      "parameters": {
+        "state": {"required": true, "type": "bool"}
+      },
+      "query": true,
+      "help": "Start or stop timing test (0/OFF or 1/ON)"
+    },
+    "TIM:LOAD:SETT": {
+      "parameters": {
+        "state": {"required": true, "type": "bool"}
+      },
+      "query": true,
+      "help": "Determine whether to change load setting during timing test (0/OFF or 1/ON)"
+    },
+    "TIM:LOAD:MODE": {
+      "parameters": {
+        "mode": {"required": true, "type": "str"}
+      },
+      "query": true,
+      "help": "Set load mode during timing test: CURR, VOLT, POW, or RES",
+      "valid_values": ["CURR", "VOLT", "POW", "RES"]
+    },
+    "TIM:LOAD:VAL": {
+      "parameters": {
+        "value": {"required": true, "type": "float"}
+      },
+      "query": true,
+      "help": "Set load parameter for timing test (units depend on TIM:LOAD:MODE)"
+    },
+    "TIM:TST:SOUR": {
+      "parameters": {
+        "source": {"required": true, "type": "str"}
+      },
+      "query": true,
+      "help": "Set trigger source for starting test: VOLT, CURR, or EXT",
+      "valid_values": ["VOLT", "CURR", "EXT"]
+    },
+    "TIM:TST:EDGE": {
+      "parameters": {
+        "edge": {"required": true, "type": "str"}
+      },
+      "query": true,
+      "help": "Set trigger edge for start test: RISE or FALL",
+      "valid_values": ["RISE", "FALL"]
+    },
+    "TIM:TST:LEV": {
+      "parameters": {
+        "level": {"required": true, "type": "float"}
+      },
+      "query": true,
+      "help": "Set trigger level for start test (units depend on TIM:TST:SOUR)"
+    },
+    "TIM:TEND:SOUR": {
+      "parameters": {
+        "source": {"required": true, "type": "str"}
+      },
+      "query": true,
+      "help": "Set trigger source for ending test: VOLT, CURR, or EXT",
+      "valid_values": ["VOLT", "CURR", "EXT"]
+    },
+    "TIM:TEND:EDGE": {
+      "parameters": {
+        "edge": {"required": true, "type": "str"}
+      },
+      "query": true,
+      "help": "Set trigger edge for end test: RISE or FALL",
+      "valid_values": ["RISE", "FALL"]
+    },
+    "TIM:TEND:LEV": {
+      "parameters": {
+        "level": {"required": true, "type": "float"}
+      },
+      "query": true,
+      "help": "Set trigger level for end test (units depend on TIM:TEND:SOUR)"
+    },
+    "TIM:RES?": {
+      "parameters": {},
+      "query": true,
+      "help": "Query timing test result (seconds)"
+    }
+  }
+}

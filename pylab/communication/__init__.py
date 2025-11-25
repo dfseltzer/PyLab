@@ -1,4 +1,4 @@
-from Connection import Connection
-from Connection import Status
+from .connection import Connection
+from .connection import Status
 
-from VISA import VISAConnection
+from .VISA import VISAConnection

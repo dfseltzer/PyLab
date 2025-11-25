@@ -6,6 +6,7 @@ from enum import Enum
 
 class ConnectionTypes(Enum):
     VISA = 0
+    VISABlank = 1
 
     @staticmethod
     def is_known(val):
@@ -24,7 +25,10 @@ def getConnection(cnx_type):
         cnx_type = ConnectionTypes[cnx_type]
     
     if cnx_type == ConnectionTypes.VISA:
-        from .VISA import VISAConnection # import here, so we don't have to if its not used.
+        from .VISA import VISAConnection
         return VISAConnection
+    elif cnx_type == ConnectionTypes.VISABlank:
+        from .VISA import VISAConnectionBlank
+        return VISAConnectionBlank
     
     raise NotImplementedError(f"Connection type '{cnx_type}' is not implemented.")
