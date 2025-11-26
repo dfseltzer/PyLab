@@ -12,14 +12,6 @@ def main():
     # Use MOCK connection so no hardware is required.
     dev = N5770A("N5770A-MOCK", address=None, connection_type="MOCK")
 
-    # Preload mock responses to illustrate query handling.
-    # Order matches the queries below.
-    dev._cnx.preload_responses([
-        "0",     # initial output state
-        "12.34", # measured voltage
-        "1.23"   # measured current
-    ])
-
     print("Enabled?", dev.enabled)
     dev.enabled = True
     dev.voltage = 10.0
@@ -27,7 +19,7 @@ def main():
 
     print("Measured voltage:", dev.voltage)
     print("Measured current:", dev.current)
-    print("Commands sent:", dev._cnx.writes)
+    print("Commands sent: (inspect via mock backend if needed)")
 
 
 if __name__ == "__main__":
