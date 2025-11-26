@@ -6,7 +6,6 @@
       "arguments and responses lists are ordered.",
       "arguments and responses of type str may have a values list for accepted values",
       "arguments and responses of type int or float may have a range parameter for min and max",
-      "If a command supports a numeric suffix, it will have 'numeric_suffix': true and a 'suffix_argument' index.",
       "If a command supports variadic arguments, the last argument will have 'variadic': true."
     ]
   },
@@ -567,47 +566,6 @@
       "help": "Set load start unloading voltage (MIN to MAX V)",
       "response": null
     },
-    "VOLT": {
-      "set": [
-        {
-          "type": "int",
-          "required": false,
-          "default": 1,
-          "range": [
-            1,
-            4
-          ],
-          "suffix": true
-        },
-        {
-          "type": "float",
-          "required": true,
-          "default": null,
-          "range": [
-            0,
-            60
-          ]
-        }
-      ],
-      "query": [
-        {
-          "type": "int",
-          "required": false,
-          "default": 1,
-          "range": [
-            1,
-            4
-          ],
-          "suffix": true
-        }
-      ],
-      "help": "Set/query voltage for a given channel (VOLT1 12.0, VOLT2 5.0, etc.)",
-      "response": [
-        {
-          "type": "float"
-        }
-      ]
-    },
     "CURR:RANG": {
       "set": [
         {
@@ -687,47 +645,6 @@
       "query": null,
       "help": "Set current protection level (MIN to MAX A)",
       "response": null
-    },
-    "CURR": {
-      "set": [
-        {
-          "type": "int",
-          "required": false,
-          "default": 1,
-          "range": [
-            1,
-            4
-          ],
-          "suffix": true
-        },
-        {
-          "type": "float",
-          "required": true,
-          "default": null,
-          "range": [
-            0,
-            30
-          ]
-        }
-      ],
-      "query": [
-        {
-          "type": "int",
-          "required": false,
-          "default": 1,
-          "range": [
-            1,
-            4
-          ],
-          "suffix": true
-        }
-      ],
-      "help": "Set/query current for a given channel (CURR1 2.5, CURR2 1.0, etc.)",
-      "response": [
-        {
-          "type": "float"
-        }
-      ]
     },
     "POW:PROT": {
       "set": [
@@ -1201,6 +1118,166 @@
       "set": null,
       "query": [],
       "help": "Query timing test result (seconds)",
+      "response": [
+        {
+          "type": "float"
+        }
+      ]
+    },
+    "VOLT1": {
+      "set": [
+        {
+          "type": "float",
+          "required": true,
+          "default": null,
+          "range": [
+            0,
+            60
+          ]
+        }
+      ],
+      "query": [],
+      "help": "Set/query voltage for channel 1 (V)",
+      "response": [
+        {
+          "type": "float"
+        }
+      ]
+    },
+    "CURR1": {
+      "set": [
+        {
+          "type": "float",
+          "required": true,
+          "default": null,
+          "range": [
+            0,
+            30
+          ]
+        }
+      ],
+      "query": [],
+      "help": "Set/query current for channel 1 (A)",
+      "response": [
+        {
+          "type": "float"
+        }
+      ]
+    },
+    "VOLT2": {
+      "set": [
+        {
+          "type": "float",
+          "required": true,
+          "default": null,
+          "range": [
+            0,
+            60
+          ]
+        }
+      ],
+      "query": [],
+      "help": "Set/query voltage for channel 2 (V)",
+      "response": [
+        {
+          "type": "float"
+        }
+      ]
+    },
+    "CURR2": {
+      "set": [
+        {
+          "type": "float",
+          "required": true,
+          "default": null,
+          "range": [
+            0,
+            30
+          ]
+        }
+      ],
+      "query": [],
+      "help": "Set/query current for channel 2 (A)",
+      "response": [
+        {
+          "type": "float"
+        }
+      ]
+    },
+    "VOLT3": {
+      "set": [
+        {
+          "type": "float",
+          "required": true,
+          "default": null,
+          "range": [
+            0,
+            60
+          ]
+        }
+      ],
+      "query": [],
+      "help": "Set/query voltage for channel 3 (V)",
+      "response": [
+        {
+          "type": "float"
+        }
+      ]
+    },
+    "CURR3": {
+      "set": [
+        {
+          "type": "float",
+          "required": true,
+          "default": null,
+          "range": [
+            0,
+            30
+          ]
+        }
+      ],
+      "query": [],
+      "help": "Set/query current for channel 3 (A)",
+      "response": [
+        {
+          "type": "float"
+        }
+      ]
+    },
+    "VOLT4": {
+      "set": [
+        {
+          "type": "float",
+          "required": true,
+          "default": null,
+          "range": [
+            0,
+            60
+          ]
+        }
+      ],
+      "query": [],
+      "help": "Set/query voltage for channel 4 (V)",
+      "response": [
+        {
+          "type": "float"
+        }
+      ]
+    },
+    "CURR4": {
+      "set": [
+        {
+          "type": "float",
+          "required": true,
+          "default": null,
+          "range": [
+            0,
+            30
+          ]
+        }
+      ],
+      "query": [],
+      "help": "Set/query current for channel 4 (A)",
       "response": [
         {
           "type": "float"

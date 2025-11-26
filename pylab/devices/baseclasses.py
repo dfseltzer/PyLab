@@ -8,7 +8,7 @@ logger = logging.getLogger(__name__)
 
 from abc import ABC, abstractmethod
 from ..communication.connectionHandler import getConnection
-from ..utilities import load_data_file
+
 
 class SCPIDevice(ABC):
     def __init__(self, name, address, command_file,
@@ -21,7 +21,7 @@ class SCPIDevice(ABC):
             logger.error(f"Failed to open connection with {e}")
         if not self._cnx:
             raise RuntimeError(f"Unable to open connection to instrument!")
-        self._command_set = load_data_file(command_file)["commands"]
+        
 
     @property
     def name(self):
