@@ -8,7 +8,7 @@ logger = logging.getLogger(__name__)
 
 from abc import ABC, abstractmethod
 from ..communication.connectionHandler import getConnection
-
+from ..utils.commandValidator import CommandValidator
 
 class SCPIDevice(ABC):
     def __init__(self, name, address, command_file,
@@ -21,7 +21,7 @@ class SCPIDevice(ABC):
             logger.error(f"Failed to open connection with {e}")
         if not self._cnx:
             raise RuntimeError(f"Unable to open connection to instrument!")
-        
+        self._cmd_validator = CommandValidator(command_file)
 
     @property
     def name(self):
@@ -47,61 +47,45 @@ class SCPIDevice(ABC):
         Returns:
             bool: True if write succeeded, False otherwise
         """
-        commands = self._command_set
-        if command not in commands:
-            logger.error(f"Command '{command}' not found in command set for {self.name}.")
-            raise KeyError(f"Command '{command}' not found in command set.")
-        cmd_entry = commands[command]
-        cmd_str = cmd_entry['command']
-        params = cmd_entry.get('parameters', {})
-        param_names = list(params.keys())
-
-        # Determine required and optional parameters
-        required_params = [k for k, v in params.items() if v.get('required', False)]
-        optional_params = [k for k, v in params.items() if not v.get('required', False)]
-        min_args = len(required_params)
-        max_args = len(param_names)
-        if not (min_args <= len(args) <= max_args):
-            logger.error(f"Command '{command}' expects between {min_args} and {max_args} arguments (required: {required_params}, optional: {optional_params}), got {len(args)}.")
-            raise ValueError(f"Command '{command}' expects between {min_args} and {max_args} arguments (required: {required_params}, optional: {optional_params}), got {len(args)}.")
-        
-        # Parameter type validation
-        for i, (arg, pname) in enumerate(zip(args, param_names)):
-            expected_type = params[pname].get('type', 'str')
-            type_map = {'int': int, 'float': float, 'str': str, 'bool': (bool, int, str)}
-            py_type = type_map.get(expected_type, str)
-            if expected_type == 'bool':
-                if isinstance(arg, (bool, int)):
-                    pass
-                elif isinstance(arg, str) and arg.upper() in ['ON', 'OFF', 'TRUE', 'FALSE', '0', '1']:
-                    pass
-                else:
-                    logger.error(f"Parameter '{pname}' for command '{command}' expects type 'bool' (0/1/ON/OFF/True/False), got value '{arg}' of type '{type(arg).__name__}'.")
-                    raise TypeError(f"Parameter '{pname}' for command '{command}' expects type 'bool' (0/1/ON/OFF/True/False), got value '{arg}' of type '{type(arg).__name__}'.")
-            else:
-                try:
-                    _ = py_type(arg)
-                except Exception:
-                    logger.error(f"Parameter '{pname}' for command '{command}' expects type '{expected_type}', got value '{arg}' of type '{type(arg).__name__}'.")
-                    raise TypeError(f"Parameter '{pname}' for command '{command}' expects type '{expected_type}', got value '{arg}' of type '{type(arg).__name__}'.")
-        if param_names and len(args) > 0:
-            try:
-                cmd_str = f"{cmd_str} " + ",".join(str(arg) for arg in args)
-            except Exception as e:
-                logger.error(f"Failed to format command '{command}' with args={args}: {e}")
-                raise
         try:
-            result = self._cnx.write(cmd_str)
-            logger.info(f"Sent command to {self.name}: {cmd_str} | params: {dict(zip(param_names, args))}")
-            return result
-        except Exception as e:
-            logger.error(f"Failed to write command '{cmd_str}' to {self.name}: {e} | params: {dict(zip(param_names, args))}")
+            cmd_str = self._cmd_validator.validate_command(command, *args)
+        except KeyError as e:
+            logger.error(f"Command '{command}' not found in command set: {e}")
             return False
+        try:
+            self._cnx.write(cmd_str)
+            return True
+        except Exception as e:
+            logger.error(f"Failed to write command '{cmd_str}': {e}")
+            return False
+        
+    def read(self):
+        """
+        Read a response from the device.
+        Raises:
+            Exception: If the read operation fails
+        """
+        try:
+            response = self._cnx.read()
+            return response
+        except Exception as e:
+            logger.error(f"Failed to read from device: {e}")
+            return None
+        
+    def query(self, command, *args):
+        """
+        Write a command to the device and read the response.
+        Args:
+            command (str): The command key to send (must be in command_set)
+            *args: Arguments to fill in for the command parameters
+        """
+        if not self.write(command, *args):
+            return None
+        return self.read()
 
     def __del__(self):
         try:
             self._cnx.close()
         except:
             logger.warning(f"{self.name} failed to close connection in __del__")
-
-    pass
+    
