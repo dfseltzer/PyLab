@@ -1,0 +1,502 @@
+{
+  "info": {
+    "device": "BK Precision 8616 Electronic Load",
+    "description": "SCPI command metadata for the BK Precision 8616. Ranges and options reflect this model's specifications where available.",
+    "notes": [
+      "Arguments and responses lists are ordered.",
+      "Arguments and responses of type str may have a values list for accepted values.",
+      "Arguments and responses of type int or float may have a range parameter for min and max.",
+      "If a command supports variadic arguments, the last argument will have 'variadic': true."
+    ]
+  },
+  "commands": {
+    "*PSC": {
+      "set": [
+        {
+          "type": "bool",
+          "required": true,
+          "default": null
+        }
+      ],
+      "query": null,
+      "help": "Power-on Status Clear - Controls service request generation on power-on (0/OFF or 1/ON)",
+      "response": null
+    },
+    "*RCL": {
+      "set": [
+        {
+          "type": "int",
+          "required": true,
+          "default": null,
+          "range": [
+            0,
+            100
+          ]
+        }
+      ],
+      "query": null,
+      "help": "Recall - Restores electronic load to a previously stored state (0 to 100)",
+      "response": null
+    },
+    "*SAV": {
+      "set": [
+        {
+          "type": "int",
+          "required": true,
+          "default": null,
+          "range": [
+            0,
+            100
+          ]
+        }
+      ],
+      "query": null,
+      "help": "Save - Stores the present state of the electronic load (0 to 100)",
+      "response": null
+    },
+    "STAT:QUES:EVEN": {
+      "set": null,
+      "query": [],
+      "help": "Query the questionable event register. Reading clears the register",
+      "response": [
+        {
+          "type": "int"
+        }
+      ]
+    },
+    "STAT:QUES:COND": {
+      "set": null,
+      "query": [],
+      "help": "Query the questionable condition register (real-time status)",
+      "response": [
+        {
+          "type": "int"
+        }
+      ]
+    },
+    "STAT:QUES:ENAB": {
+      "set": [
+        {
+          "type": "int",
+          "required": true,
+          "default": null,
+          "range": [
+            0,
+            32767
+          ]
+        }
+      ],
+      "query": null,
+      "help": "Set the questionable enable register (0 to 32767)",
+      "response": null
+    },
+    "STAT:OPER:EVEN": {
+      "set": null,
+      "query": [],
+      "help": "Query the operation event register. Reading clears the register",
+      "response": [
+        {
+          "type": "int"
+        }
+      ]
+    },
+    "STAT:OPER:COND": {
+      "set": null,
+      "query": [],
+      "help": "Query the operation condition register (real-time status)",
+      "response": [
+        {
+          "type": "int"
+        }
+      ]
+    },
+    "STAT:OPER:ENAB": {
+      "set": [
+        {
+          "type": "int",
+          "required": true,
+          "default": null,
+          "range": [
+            0,
+            65535
+          ]
+        }
+      ],
+      "query": null,
+      "help": "Set the operation enable register (0 to 65535)",
+      "response": null
+    },
+    "MEAS:VOLT": {
+      "set": null,
+      "query": [],
+      "help": "Query the average DC voltage at the load input",
+      "response": [
+        {
+          "type": "float"
+        }
+      ]
+    },
+    "MEAS:VOLT:MAX": {
+      "set": null,
+      "query": [],
+      "help": "Query the peak voltage at the load input",
+      "response": [
+        {
+          "type": "float"
+        }
+      ]
+    },
+    "MEAS:VOLT:MIN": {
+      "set": null,
+      "query": [],
+      "help": "Query the minimum voltage at the load input",
+      "response": [
+        {
+          "type": "float"
+        }
+      ]
+    },
+    "MEAS:VOLT:PTP": {
+      "set": null,
+      "query": [],
+      "help": "Query the voltage peak-to-peak value",
+      "response": [
+        {
+          "type": "float"
+        }
+      ]
+    },
+    "MEAS:CURR": {
+      "set": null,
+      "query": [],
+      "help": "Query the average DC current at the load input",
+      "response": [
+        {
+          "type": "float"
+        }
+      ]
+    },
+    "MEAS:CURR:MAX": {
+      "set": null,
+      "query": [],
+      "help": "Query the peak current at the load input",
+      "response": [
+        {
+          "type": "float"
+        }
+      ]
+    },
+    "MEAS:CURR:MIN": {
+      "set": null,
+      "query": [],
+      "help": "Query the minimum current at the load input",
+      "response": [
+        {
+          "type": "float"
+        }
+      ]
+    },
+    "MEAS:CURR:PTP": {
+      "set": null,
+      "query": [],
+      "help": "Query the current peak-to-peak value",
+      "response": [
+        {
+          "type": "float"
+        }
+      ]
+    },
+    "MEAS:POW": {
+      "set": null,
+      "query": [],
+      "help": "Query the average power at the load input",
+      "response": [
+        {
+          "type": "float"
+        }
+      ]
+    },
+    "MEAS:RES": {
+      "set": null,
+      "query": [],
+      "help": "Query the equivalent impedance",
+      "response": [
+        {
+          "type": "float"
+        }
+      ]
+    },
+    "INP": {
+      "set": [
+        {
+          "type": "bool",
+          "required": true,
+          "default": null
+        }
+      ],
+      "query": null,
+      "help": "Set input on/off state (0/OFF or 1/ON)",
+      "response": null
+    },
+    "INP:SHOR": {
+      "set": [
+        {
+          "type": "bool",
+          "required": true,
+          "default": null
+        }
+      ],
+      "query": null,
+      "help": "Set short circuit function state (0/OFF or 1/ON)",
+      "response": null
+    },
+    "FUNC": {
+      "set": [
+        {
+          "type": "str",
+          "required": true,
+          "default": null,
+          "values": [
+            "CURR",
+            "VOLT",
+            "POW",
+            "RES",
+            "IMP"
+          ]
+        }
+      ],
+      "query": null,
+      "help": "Select input mode: CURR, VOLT, POW, RES, or IMP",
+      "response": null
+    },
+    "MODE": {
+      "set": [
+        {
+          "type": "str",
+          "required": true,
+          "default": null,
+          "values": [
+            "CURR",
+            "VOLT",
+            "POW",
+            "RES",
+            "IMP"
+          ]
+        }
+      ],
+      "query": null,
+      "help": "Select input mode (equivalent to FUNC): CURR, VOLT, POW, RES, or IMP",
+      "response": null
+    },
+    "VOLT:RANG": {
+      "set": [
+        {
+          "type": "float",
+          "required": true,
+          "default": null,
+          "range": [
+            0.0,
+            500.0
+          ]
+        }
+      ],
+      "query": null,
+      "help": "Set voltage range (0 to 500 V for 8616)",
+      "response": null
+    },
+    "VOLT:RANG:AUTO": {
+      "set": [
+        {
+          "type": "bool",
+          "required": true,
+          "default": null
+        }
+      ],
+      "query": null,
+      "help": "Set voltage auto-range state (0/OFF or 1/ON)",
+      "response": null
+    },
+    "VOLT:ON": {
+      "set": [
+        {
+          "type": "float",
+          "required": true,
+          "default": null,
+          "range": [
+            0.0,
+            500.0
+          ]
+        }
+      ],
+      "query": null,
+      "help": "Set Von voltage of sink current on threshold (0 to 500 V)",
+      "response": null
+    },
+    "CURR:RANG": {
+      "set": [
+        {
+          "type": "float",
+          "required": true,
+          "default": null,
+          "range": [
+            0.0,
+            60.0
+          ]
+        }
+      ],
+      "query": null,
+      "help": "Set current range (0 to 60 A for 8616)",
+      "response": null
+    },
+    "CURR:SLEW": {
+      "set": [
+        {
+          "type": "float",
+          "required": true,
+          "default": null,
+          "range": [
+            0.0001,
+            1.0
+          ]
+        }
+      ],
+      "query": null,
+      "help": "Set slew rate for all current changes (0.0001 to 1.0 A/µs for 8616, depending on low/high rate selection)",
+      "response": null
+    },
+    "CURR:SLEW:RISE": {
+      "set": [
+        {
+          "type": "float",
+          "required": true,
+          "default": null,
+          "range": [
+            0.0001,
+            1.0
+          ]
+        }
+      ],
+      "query": null,
+      "help": "Set current slew rate for positive transitions (0.0001 to 1.0 A/µs for 8616)",
+      "response": null
+    },
+    "CURR:SLEW:FALL": {
+      "set": [
+        {
+          "type": "float",
+          "required": true,
+          "default": null,
+          "range": [
+            0.0001,
+            1.0
+          ]
+        }
+      ],
+      "query": null,
+      "help": "Set current slew rate for negative transitions (0.0001 to 1.0 A/µs for 8616)",
+      "response": null
+    },
+    "CURR:PROT": {
+      "set": [
+        {
+          "type": "float",
+          "required": true,
+          "default": null,
+          "range": [
+            0.0,
+            66.0
+          ]
+        }
+      ],
+      "query": null,
+      "help": "Set current protection level (0 to 66 A software OCP limit for 8616)",
+      "response": null
+    },
+    "POW:PROT": {
+      "set": [
+        {
+          "type": "float",
+          "required": true,
+          "default": null,
+          "range": [
+            0.0,
+            1250.0
+          ]
+        }
+      ],
+      "query": null,
+      "help": "Set power protection level (0 to 1250 W OPP limit for 8616)",
+      "response": null
+    },
+    "POW": {
+      "set": [
+        {
+          "type": "float",
+          "required": true,
+          "default": null,
+          "range": [
+            0.0,
+            1200.0
+          ]
+        }
+      ],
+      "query": null,
+      "help": "Set power in CW mode (0 to 1200 W for 8616)",
+      "response": null
+    },
+    "RES": {
+      "set": [
+        {
+          "type": "float",
+          "required": true,
+          "default": null,
+          "range": [
+            0.1,
+            7500.0
+          ]
+        }
+      ],
+      "query": null,
+      "help": "Set resistance in CR mode (0.1 to 7500 Ω for 8616 across low/high ranges)",
+      "response": null
+    },
+    "SYST:ERR": {
+      "set": null,
+      "query": [],
+      "help": "Query the next error from the error queue. Returns error number and message",
+      "response": [
+        {
+          "type": "str"
+        }
+      ]
+    },
+    "SYST:VERS": {
+      "set": null,
+      "query": [],
+      "help": "Query the SCPI version (format YYYY.V)",
+      "response": [
+        {
+          "type": "str"
+        }
+      ]
+    },
+    "SYST:LOC": {
+      "set": [],
+      "query": null,
+      "help": "Set the load to local mode (front panel control enabled)",
+      "response": null
+    },
+    "SYST:REM": {
+      "set": [],
+      "query": null,
+      "help": "Set the load to remote mode (most front panel buttons disabled except LOCAL)",
+      "response": null
+    },
+    "SYST:RWL": {
+      "set": [],
+      "query": null,
+      "help": "Set the load to remote mode with all front panel buttons disabled (local lockout)",
+      "response": null
+    }
+  }
+}

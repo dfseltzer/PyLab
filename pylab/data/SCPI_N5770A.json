@@ -1,0 +1,570 @@
+{
+  "info": {
+    "device": "Keysight N5770A Series DC Power Supply",
+    "description": "SCPI command metadata derived from Keysight 9018-04960.pdf (pages 65-81). Commands already covered by SCPI_Common.json are omitted.",
+    "notes": [
+      "Arguments and responses lists are ordered.",
+      "Arguments and responses of type str may have a values list for accepted values.",
+      "Arguments and responses of type int or float may have a range parameter for min and max.",
+      "If a command supports variadic arguments, the last argument will have 'variadic': true."
+    ]
+  },
+  "commands": {
+    "CAL:CURR": {
+      "set": [
+        {
+          "type": "float",
+          "required": true,
+          "default": null
+        }
+      ],
+      "query": null,
+      "help": "Calibrate the output current programming",
+      "response": null
+    },
+    "CAL:DATA": {
+      "set": [
+        {
+          "type": "float",
+          "required": true,
+          "default": null
+        }
+      ],
+      "query": null,
+      "help": "Enter calibration value (volts or amps depending on function)",
+      "response": null
+    },
+    "CAL:DATE": {
+      "set": [
+        {
+          "type": "str",
+          "required": true,
+          "default": null
+        }
+      ],
+      "query": [],
+      "help": "Set/query calibration date",
+      "response": [
+        {
+          "type": "str"
+        }
+      ]
+    },
+    "CAL:LEVel": {
+      "set": [
+        {
+          "type": "str",
+          "required": true,
+          "default": null,
+          "values": [
+            "P1",
+            "P2"
+          ]
+        }
+      ],
+      "query": null,
+      "help": "Advance to the next calibration step",
+      "response": null
+    },
+    "CAL:PASS": {
+      "set": [
+        {
+          "type": "float",
+          "required": true,
+          "default": null
+        }
+      ],
+      "query": null,
+      "help": "Set numeric calibration password",
+      "response": null
+    },
+    "CAL:STAT": {
+      "set": [
+        {
+          "type": "bool",
+          "required": true,
+          "default": null
+        }
+      ],
+      "query": [],
+      "help": "Enable/disable calibration mode (optional password)",
+      "response": [
+        {
+          "type": "bool"
+        }
+      ]
+    },
+    "CAL:VOLT": {
+      "set": [
+        {
+          "type": "float",
+          "required": true,
+          "default": null
+        }
+      ],
+      "query": null,
+      "help": "Calibrate the output voltage programming",
+      "response": null
+    },
+
+    "MEAS:CURR": {
+      "set": null,
+      "query": [],
+      "help": "Return the measured output current",
+      "response": [
+        {
+          "type": "float"
+        }
+      ]
+    },
+    "MEAS:VOLT": {
+      "set": null,
+      "query": [],
+      "help": "Return the measured output voltage",
+      "response": [
+        {
+          "type": "float"
+        }
+      ]
+    },
+
+    "OUTP:STAT": {
+      "set": [
+        {
+          "type": "bool",
+          "required": true,
+          "default": null
+        }
+      ],
+      "query": [],
+      "help": "Enable/disable output",
+      "response": [
+        {
+          "type": "bool"
+        }
+      ]
+    },
+    "OUTP:PON:STAT": {
+      "set": [
+        {
+          "type": "str",
+          "required": true,
+          "default": null,
+          "values": [
+            "RST",
+            "AUTO"
+          ]
+        }
+      ],
+      "query": [],
+      "help": "Program power-on state (RST or AUTO)",
+      "response": [
+        {
+          "type": "str"
+        }
+      ]
+    },
+    "OUTP:PROT:CLE": {
+      "set": [],
+      "query": null,
+      "help": "Reset latched protection",
+      "response": null
+    },
+
+    "SOUR:CURR:LEV:IMM:AMPL": {
+      "set": [
+        {
+          "type": "float",
+          "required": true,
+          "default": null,
+          "values": [
+            "MIN",
+            "MAX"
+          ]
+        }
+      ],
+      "query": [],
+      "help": "Set/query immediate output current level",
+      "response": [
+        {
+          "type": "float"
+        }
+      ]
+    },
+    "SOUR:CURR:LEV:TRIG:AMPL": {
+      "set": [
+        {
+          "type": "float",
+          "required": true,
+          "default": null,
+          "values": [
+            "MIN",
+            "MAX"
+          ]
+        }
+      ],
+      "query": [],
+      "help": "Set/query triggered output current level",
+      "response": [
+        {
+          "type": "float"
+        }
+      ]
+    },
+    "SOUR:CURR:PROT:STAT": {
+      "set": [
+        {
+          "type": "bool",
+          "required": true,
+          "default": null
+        }
+      ],
+      "query": [],
+      "help": "Enable/disable over-current protection",
+      "response": [
+        {
+          "type": "bool"
+        }
+      ]
+    },
+    "SOUR:VOLT:LEV:IMM:AMPL": {
+      "set": [
+        {
+          "type": "float",
+          "required": true,
+          "default": null,
+          "values": [
+            "MIN",
+            "MAX"
+          ]
+        }
+      ],
+      "query": [],
+      "help": "Set/query immediate output voltage level",
+      "response": [
+        {
+          "type": "float"
+        }
+      ]
+    },
+    "SOUR:VOLT:LEV:TRIG:AMPL": {
+      "set": [
+        {
+          "type": "float",
+          "required": true,
+          "default": null,
+          "values": [
+            "MIN",
+            "MAX"
+          ]
+        }
+      ],
+      "query": [],
+      "help": "Set/query triggered output voltage level",
+      "response": [
+        {
+          "type": "float"
+        }
+      ]
+    },
+    "SOUR:VOLT:LIM:LOW": {
+      "set": [
+        {
+          "type": "float",
+          "required": true,
+          "default": null,
+          "values": [
+            "MIN",
+            "MAX"
+          ]
+        }
+      ],
+      "query": [],
+      "help": "Set/query low voltage limit",
+      "response": [
+        {
+          "type": "float"
+        }
+      ]
+    },
+    "SOUR:VOLT:PROT:LEV": {
+      "set": [
+        {
+          "type": "float",
+          "required": true,
+          "default": null,
+          "values": [
+            "MIN",
+            "MAX"
+          ]
+        }
+      ],
+      "query": [],
+      "help": "Set/query over-voltage protection level",
+      "response": [
+        {
+          "type": "float"
+        }
+      ]
+    },
+    "STAT:OPER:EVEN": {
+      "set": null,
+      "query": [],
+      "help": "Read operation event register (reading clears it)",
+      "response": [
+        {
+          "type": "int"
+        }
+      ]
+    },
+    "STAT:OPER:COND": {
+      "set": null,
+      "query": [],
+      "help": "Read operation condition register",
+      "response": [
+        {
+          "type": "int"
+        }
+      ]
+    },
+    "STAT:OPER:ENAB": {
+      "set": [
+        {
+          "type": "int",
+          "required": true,
+          "default": null
+        }
+      ],
+      "query": [],
+      "help": "Set/query operation enable register",
+      "response": [
+        {
+          "type": "int"
+        }
+      ]
+    },
+    "STAT:OPER:NTR": {
+      "set": [
+        {
+          "type": "int",
+          "required": true,
+          "default": null
+        }
+      ],
+      "query": [],
+      "help": "Set/query negative transition filter for operation status",
+      "response": [
+        {
+          "type": "int"
+        }
+      ]
+    },
+    "STAT:OPER:PTR": {
+      "set": [
+        {
+          "type": "int",
+          "required": true,
+          "default": null
+        }
+      ],
+      "query": [],
+      "help": "Set/query positive transition filter for operation status",
+      "response": [
+        {
+          "type": "int"
+        }
+      ]
+    },
+    "STAT:PRESET": {
+      "set": [],
+      "query": null,
+      "help": "Preset status registers to power-on defaults",
+      "response": null
+    },
+    "STAT:QUES:EVEN": {
+      "set": null,
+      "query": [],
+      "help": "Read questionable event register (reading clears it)",
+      "response": [
+        {
+          "type": "int"
+        }
+      ]
+    },
+    "STAT:QUES:COND": {
+      "set": null,
+      "query": [],
+      "help": "Read questionable condition register",
+      "response": [
+        {
+          "type": "int"
+        }
+      ]
+    },
+    "STAT:QUES:ENAB": {
+      "set": [
+        {
+          "type": "int",
+          "required": true,
+          "default": null
+        }
+      ],
+      "query": [],
+      "help": "Set/query questionable enable register",
+      "response": [
+        {
+          "type": "int"
+        }
+      ]
+    },
+    "STAT:QUES:NTR": {
+      "set": [
+        {
+          "type": "int",
+          "required": true,
+          "default": null
+        }
+      ],
+      "query": [],
+      "help": "Set/query negative transition filter for questionable status",
+      "response": [
+        {
+          "type": "int"
+        }
+      ]
+    },
+    "STAT:QUES:PTR": {
+      "set": [
+        {
+          "type": "int",
+          "required": true,
+          "default": null
+        }
+      ],
+      "query": [],
+      "help": "Set/query positive transition filter for questionable status",
+      "response": [
+        {
+          "type": "int"
+        }
+      ]
+    },
+
+    "SYST:COMM:RLST": {
+      "set": [
+        {
+          "type": "str",
+          "required": true,
+          "default": null,
+          "values": [
+            "LOCAL",
+            "REMOTE",
+            "RWLOCK"
+          ]
+        }
+      ],
+      "query": [],
+      "help": "Specify remote/local state of instrument",
+      "response": [
+        {
+          "type": "str"
+        }
+      ]
+    },
+    "SYST:ERR": {
+      "set": null,
+      "query": [],
+      "help": "Query the error queue (number and string)",
+      "response": [
+        {
+          "type": "str"
+        }
+      ]
+    },
+    "SYST:VERS": {
+      "set": null,
+      "query": [],
+      "help": "Query SCPI version number",
+      "response": [
+        {
+          "type": "str"
+        }
+      ]
+    },
+
+    "TRIG:SOUR": {
+      "set": [
+        {
+          "type": "str",
+          "required": true,
+          "default": null,
+          "values": [
+            "BUS"
+          ]
+        }
+      ],
+      "query": null,
+      "help": "Set measurement trigger source",
+      "response": null
+    },
+    "TRIG:IMM": {
+      "set": [],
+      "query": null,
+      "help": "Generate a trigger immediately",
+      "response": null
+    },
+    "TRIG:TRAN": {
+      "set": [],
+      "query": null,
+      "help": "Generate a transient trigger",
+      "response": null
+    },
+
+    "*OPT": {
+      "set": null,
+      "query": [],
+      "help": "Return option number",
+      "response": [
+        {
+          "type": "str"
+        }
+      ]
+    },
+    "*RCL": {
+      "set": [
+        {
+          "type": "int",
+          "required": true,
+          "default": null
+        }
+      ],
+      "query": null,
+      "help": "Recall a saved instrument state",
+      "response": null
+    },
+    "*SAV": {
+      "set": [
+        {
+          "type": "int",
+          "required": true,
+          "default": null
+        }
+      ],
+      "query": null,
+      "help": "Save the current instrument state",
+      "response": null
+    },
+    "*TRG": {
+      "set": [],
+      "query": null,
+      "help": "Issue a trigger",
+      "response": null
+    },
+    "*WAI": {
+      "set": [],
+      "query": null,
+      "help": "Hold off until all pending operations complete",
+      "response": null
+    }
+  }
+}

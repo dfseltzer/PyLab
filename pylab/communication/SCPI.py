@@ -13,6 +13,22 @@ class CommandValidator(object):
         self._command_set = load_data_file("SCPI_Common.json")["commands"]
         self._command_set.update(load_data_file(command_set)["commands"])
 
+    @property
+    def commands(self):
+        """Return the underlying command definition mapping."""
+        return self._command_set
+
+    def get(self, command):
+        """
+        Return the command definition for a base command (no '?' suffix).
+        Raises KeyError if not present.
+        """
+        is_query = command.endswith("?")
+        base = command[:-1] if is_query else command
+        if base not in self._command_set:
+            raise KeyError(f"Command '{base}' not found in command set.")
+        return self._command_set[base]
+
     def __call__(self, command, *args):
         """
         Format and validate a SCPI command. The command may end with '?' (query) or not (set).
@@ -61,19 +77,25 @@ class CommandValidator(object):
                 else:
                     raise TypeError(f"Argument {idx} for '{base}' expects bool-like value, got {val!r}.")
             elif typ == "int":
-                try:
-                    ival = int(val)
-                except Exception:
-                    raise TypeError(f"Argument {idx} for '{base}' expects int, got {val!r}.")
+                if isinstance(val, str) and val in arg_def.get("values", []):
+                    ival = val  # allow token strings
+                else:
+                    try:
+                        ival = int(val)
+                    except Exception:
+                        raise TypeError(f"Argument {idx} for '{base}' expects int, got {val!r}.")
                 rng = arg_def.get("range")
                 if rng and all(isinstance(x, (int, float, type(None))) for x in rng):
                     if (rng[0] is not None and ival < rng[0]) or (rng[1] is not None and ival > rng[1]):
                         raise ValueError(f"Argument {idx} for '{base}' out of range {rng}: {ival}")
             elif typ == "float":
-                try:
-                    fval = float(val)
-                except Exception:
-                    raise TypeError(f"Argument {idx} for '{base}' expects float, got {val!r}.")
+                if isinstance(val, str) and val in arg_def.get("values", []):
+                    fval = val  # allow token strings like MIN/MAX
+                else:
+                    try:
+                        fval = float(val)
+                    except Exception:
+                        raise TypeError(f"Argument {idx} for '{base}' expects float, got {val!r}.")
                 rng = arg_def.get("range")
                 if rng and all(isinstance(x, (int, float, type(None))) for x in rng):
                     if (rng[0] is not None and fval < rng[0]) or (rng[1] is not None and fval > rng[1]):

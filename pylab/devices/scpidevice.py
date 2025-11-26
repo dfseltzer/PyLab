@@ -4,11 +4,12 @@ to ensure a consistent interface.
 """
 
 import logging
-logger = logging.getLogger(__name__)
-
 from abc import ABC, abstractmethod
 from ..communication.connectionHandler import getConnection
-from ..utils.commandValidator import CommandValidator
+from ..communication.SCPI import CommandValidator
+from .exceptions import UnknownCommandError
+
+logger = logging.getLogger(__name__)
 
 class SCPIDevice(ABC):
     def __init__(self, name, address, command_file,
@@ -35,6 +36,10 @@ class SCPIDevice(ABC):
     def connection_status(self):
         return self._cnx.status
 
+    def get_command_def(self, command):
+        """Return the raw command definition from the validator."""
+        return self._cmd_validator.get(command)
+
     def write(self, command, *args):
         """
         Write a command to the device after validating against the command set.
@@ -42,22 +47,18 @@ class SCPIDevice(ABC):
             command (str): The command key to send (must be in command_set)
             *args: Arguments to fill in for the command parameters
         Raises:
-            KeyError: If the command is not in the command set
+            UnknownCommandError: If the command is not in the command set
             Exception: If the write operation fails
         Returns:
             bool: True if write succeeded, False otherwise
         """
         try:
             cmd_str = self._cmd_validator.validate_command(command, *args)
-        except KeyError as e:
-            logger.error(f"Command '{command}' not found in command set: {e}")
-            return False
-        try:
-            self._cnx.write(cmd_str)
-            return True
-        except Exception as e:
-            logger.error(f"Failed to write command '{cmd_str}': {e}")
-            return False
+        except KeyError:
+            raise UnknownCommandError(command, known_commands=self._cmd_validator.commands.keys())
+
+        self._cnx.write(cmd_str)
+        return True
         
     def read(self):
         """
@@ -65,12 +66,7 @@ class SCPIDevice(ABC):
         Raises:
             Exception: If the read operation fails
         """
-        try:
-            response = self._cnx.read()
-            return response
-        except Exception as e:
-            logger.error(f"Failed to read from device: {e}")
-            return None
+        return self._cnx.read()
         
     def query(self, command, *args):
         """
@@ -79,13 +75,23 @@ class SCPIDevice(ABC):
             command (str): The command key to send (must be in command_set)
             *args: Arguments to fill in for the command parameters
         """
-        if not self.write(command, *args):
-            return None
+        self.write(command, *args)
         return self.read()
+
+    def open(self):
+        """Open the underlying connection."""
+        return self._cnx.open()
+
+    def close(self):
+        """Close the underlying connection."""
+        return self._cnx.close()
+
+    def reset_connection(self):
+        """Reset the underlying connection."""
+        return self._cnx.reset()
 
     def __del__(self):
         try:
             self._cnx.close()
         except:
             logger.warning(f"{self.name} failed to close connection in __del__")
-    

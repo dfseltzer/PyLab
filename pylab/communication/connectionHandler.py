@@ -6,7 +6,7 @@ from enum import Enum
 
 class ConnectionTypes(Enum):
     VISA = 0
-    VISABlank = 1
+    MOCK = 1
 
     @staticmethod
     def is_known(val):
@@ -27,8 +27,8 @@ def getConnection(cnx_type):
     if cnx_type == ConnectionTypes.VISA:
         from .VISA import VISAConnection
         return VISAConnection
-    elif cnx_type == ConnectionTypes.VISABlank:
-        from .VISA import VISAConnectionBlank
-        return VISAConnectionBlank
+    elif cnx_type == ConnectionTypes.MOCK:
+        from .mock import MockConnection
+        return MockConnection
     
     raise NotImplementedError(f"Connection type '{cnx_type}' is not implemented.")

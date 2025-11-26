@@ -1,0 +1,90 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "SCPI Command Set Schema",
+  "type": "object",
+  "required": [
+    "info",
+    "commands"
+  ],
+  "properties": {
+    "info": {
+      "type": "object",
+      "required": [
+        "device",
+        "description"
+      ],
+      "properties": {
+        "device": { "type": "string" },
+        "description": { "type": "string" },
+        "notes": {
+          "type": "array",
+          "items": { "type": "string" }
+        }
+      },
+      "additionalProperties": true
+    },
+    "commands": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "object",
+        "required": [
+          "set",
+          "query",
+          "help",
+          "response"
+        ],
+        "properties": {
+          "set": {
+            "anyOf": [
+              { "$ref": "#/definitions/argArray" },
+              { "type": "null" }
+            ]
+          },
+          "query": {
+            "anyOf": [
+              { "$ref": "#/definitions/argArray" },
+              { "type": "null" }
+            ]
+          },
+          "response": {
+            "anyOf": [
+              { "$ref": "#/definitions/argArray" },
+              { "type": "null" }
+            ]
+          },
+          "help": { "type": "string" }
+        },
+        "additionalProperties": false
+      }
+    }
+  },
+  "definitions": {
+    "argArray": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "type": { "type": "string", "enum": [ "bool", "int", "float", "str" ] },
+          "required": { "type": "boolean" },
+          "default": {},
+          "range": {
+            "type": "array",
+            "items": [
+              { "type": [ "number", "null", "string" ] },
+              { "type": [ "number", "null", "string" ] }
+            ],
+            "minItems": 2,
+            "maxItems": 2
+          },
+          "values": {
+            "type": "array",
+            "items": { "type": [ "string", "number", "boolean" ] }
+          },
+          "variadic": { "type": "boolean" }
+        },
+        "required": [ "type" ],
+        "additionalProperties": true
+      }
+    }
+  }
+}
