@@ -2,8 +2,8 @@
 Helpers for parsing and formatting SCPI commands
 """
 
-import json
-from pathlib import Path
+import logging
+logger = logging.getLogger(__name__)
 from ..utilities import load_data_file
 
 
@@ -122,3 +122,57 @@ class CommandValidator(object):
         if is_query and not cmd_str.endswith("?"):
             cmd_str += "?"
         return cmd_str
+
+    def normalize_value(self, command, value):
+        """
+        Clamp or normalize a value based on command metadata (supports MIN/MAX tokens).
+        Returns the possibly modified value.
+        """
+        is_query = command.endswith("?")
+        base = command[:-1] if is_query else command
+        if base not in self._command_set:
+            return value
+        arg_defs = self._command_set[base].get("set") or []
+        if not arg_defs:
+            return value
+        def normalize_single(arg_def, val):
+            arg_type = arg_def.get("type")
+            rng = arg_def.get("range") or [None, None]
+            # token handling
+            if isinstance(val, str) and val.upper() == "MIN" and rng[0] is not None:
+                logger.warning(f"Normalizing {command} value MIN to {rng[0]}")
+                return rng[0]
+            if isinstance(val, str) and val.upper() == "MAX" and rng[1] is not None:
+                logger.warning(f"Normalizing {command} value MAX to {rng[1]}")
+                return rng[1]
+            # numeric clamping
+            if arg_type in ("float", "int"):
+                try:
+                    num = float(val) if arg_type == "float" else int(val)
+                except Exception:
+                    return val
+                low, high = rng
+                clamped = num
+                if low is not None and num < low:
+                    logger.warning(f"Clamping {command} value {num} to min {low}")
+                    clamped = low
+                if high is not None and clamped > high:
+                    logger.warning(f"Clamping {command} value {clamped} to max {high}")
+                    clamped = high
+                # preserve expected type
+                return float(clamped) if arg_type == "float" else int(clamped)
+            return val
+
+        # normalize across all provided args
+        normalized_args = []
+        variadic = arg_defs[-1].get("variadic", False)
+        for idx, val in enumerate(value if isinstance(value, (list, tuple)) else [value]):
+            if idx < len(arg_defs):
+                normalized_args.append(normalize_single(arg_defs[idx], val))
+            elif variadic:
+                normalized_args.append(normalize_single(arg_defs[-1], val))
+            else:
+                normalized_args.append(val)
+        if isinstance(value, (list, tuple)):
+            return type(value)(normalized_args)
+        return normalized_args[0] if normalized_args else value

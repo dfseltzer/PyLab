@@ -40,6 +40,49 @@ class SCPIDevice(ABC):
         """Return the raw command definition from the validator."""
         return self._cmd_validator.get(command)
 
+    def _normalize_set_value(self, command, value):
+        """
+        Clamp or normalize a set value according to the command's metadata.
+        Supports MIN/MAX tokens and numeric range clamping; logs a warning when clamping.
+        """
+        try:
+            cmd_def = self.get_command_def(command)
+        except KeyError:
+            return value
+
+        arg_defs = cmd_def.get("set") or []
+        if not arg_defs:
+            return value
+        arg_def = arg_defs[0]
+        arg_type = arg_def.get("type")
+        vals = arg_def.get("values") or []
+        rng = arg_def.get("range") or [None, None]
+
+        # Handle token values (MIN/MAX)
+        if isinstance(value, str) and value.upper() in {"MIN", "MAX"}:
+            if value.upper() == "MIN" and rng[0] is not None:
+                return rng[0]
+            if value.upper() == "MAX" and rng[1] is not None:
+                return rng[1]
+            return value
+
+        if arg_type in ("float", "int"):
+            try:
+                num = float(value) if arg_type == "float" else int(value)
+            except Exception:
+                return value
+            low, high = rng
+            clamped = num
+            if low is not None and num < low:
+                logger.warning(f"Clamping {command} value {num} to min {low}")
+                clamped = low
+            if high is not None and clamped > high:
+                logger.warning(f"Clamping {command} value {clamped} to max {high}")
+                clamped = high
+            return clamped
+
+        return value
+
     def write(self, command, *args):
         """
         Write a command to the device after validating against the command set.
@@ -53,7 +96,8 @@ class SCPIDevice(ABC):
             bool: True if write succeeded, False otherwise
         """
         try:
-            cmd_str = self._cmd_validator.validate_command(command, *args)
+            normed = [self._cmd_validator.normalize_value(command, a) for a in args]
+            cmd_str = self._cmd_validator.validate_command(command, *normed)
         except KeyError:
             raise UnknownCommandError(command, known_commands=self._cmd_validator.commands.keys())
 
