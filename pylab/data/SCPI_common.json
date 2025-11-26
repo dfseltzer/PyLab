@@ -1,0 +1,95 @@
+{
+  "info": "Base set of SCPI commands supported by all instruments",
+  "commands": {
+    "*CLS": {
+      "set": [],
+      "query": null,
+      "help": "Clear Status - Clears the Standard Event Register, Operation Event Register, Questionable Event Register, and Error Queue",
+      "response": null
+    },
+    "*ESE": {
+      "set": [
+        {
+          "type": "int",
+          "required": true,
+          "default": null,
+          "range": [
+            0,
+            255
+          ]
+        }
+      ],
+      "query": null,
+      "help": "Event Enable - Programs the Standard Event Status Enable register bits (0 to 255)",
+      "response": null
+    },
+    "*ESR": {
+      "set": null,
+      "query": [],
+      "help": "Query the Standard Event Status Event register. Reading the register clears it",
+      "response": [
+        {
+          "type": "int"
+        }
+      ]
+    },
+    "*IDN": {
+      "set": null,
+      "query": [],
+      "help": "Identification query - Returns manufacturer, model, serial number, and firmware version",
+      "response": [
+        {
+          "type": "str"
+        }
+      ]
+    },
+    "*OPC": {
+      "set": [],
+      "query": null,
+      "help": "Operation Complete - Sets OPC bit when all pending operations are complete",
+      "response": null
+    },
+    "*RST": {
+      "set": [],
+      "query": null,
+      "help": "Reset - Resets the electronic load to factory-defined states",
+      "response": null
+    },
+    "*SRE": {
+      "set": [
+        {
+          "type": "int",
+          "required": true,
+          "default": null,
+          "range": [
+            0,
+            255
+          ]
+        }
+      ],
+      "query": null,
+      "help": "Service Request Enable - Sets the Service Request Enable Register (0 to 255)",
+      "response": null
+    },
+    "*STB": {
+      "set": null,
+      "query": [],
+      "help": "Status Byte query - Reads the Status Byte register",
+      "response": [
+        {
+          "type": "int"
+        }
+      ]
+    },
+    "*TST": {
+      "set": null,
+      "query": [],
+      "help": "Self-test query - Returns 0 if passed, non-zero error code if failed",
+      "response": [
+        {
+          "type": "int"
+        }
+      ]
+    }
+  }
+}
