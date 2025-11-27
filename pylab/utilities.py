@@ -23,9 +23,14 @@ def load_data_file(fname):
     :return: data loaded from file as dict
     """
 
-    full_path = pathlib.Path(DATA_ABS_PATH, fname+".json") # type: ignore
+    base_path = pathlib.Path(DATA_ABS_PATH, fname)  # type: ignore
+    candidates = (base_path, pathlib.Path(f"{base_path}.json"))
 
-    with open(full_path,"r") as fobj:
+    full_path = next((path for path in candidates if path.is_file()), None)
+    if full_path is None:
+        raise FileNotFoundError(f"Data file '{fname}' not found in {DATA_ABS_PATH}")
+
+    with open(full_path, "r") as fobj:
         fdat = json.load(fobj)
 
     return fdat

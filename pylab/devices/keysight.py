@@ -2,17 +2,15 @@
 Keysight Devices
 """
 import logging
-from .scpidevice import SCPIDevice
-from .dcsource import DCSource
-
 logger = logging.getLogger(__name__)
 
+from .abstracts import SCPISource
 
-class N5770A(SCPIDevice, DCSource):
+class N5770A(SCPISource):
     command_file = "SCPI_N5770A"
 
-    def __init__(self, name, address, **connection_args) -> None:
-        super().__init__(name, address, self.command_file, connection_type="VISA", **connection_args)
+    def __init__(self, name, address, connection_type="VISA", **connection_args) -> None:
+        super().__init__(name, address, connection_type, **connection_args)
 
     @property
     def enabled(self) -> bool:
@@ -54,3 +52,11 @@ class N5770A(SCPIDevice, DCSource):
     @current.setter
     def current(self, value: float):
         self.write("SOUR:CURR:LEV:IMM:AMPL", value)
+
+    @property
+    def power(self) -> float:
+        raise NotImplementedError("Power query not defined in SCPI_N5770A command file.")
+
+    @power.setter
+    def power(self, value: float):
+        raise NotImplementedError("Power set not defined in SCPI_N5770A command file.")

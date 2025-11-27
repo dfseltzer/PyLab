@@ -3,21 +3,20 @@ BK Precision Devices
 """
 import logging
 logger = logging.getLogger(__name__)
-from .scpidevice import SCPIDevice
-from .dcload import DCLoad
 
-class BK8616(SCPIDevice, DCLoad):
-    command_file = 'SCPI_BK8616'
-    def __init__(self, name, address, **connection_args) -> None:
-        super().__init__(name, address, self.command_file, 
-                         connection_type="VISA", **connection_args)
+from .abstracts import SCPILoad
+
+class BK8616(SCPILoad):
+    command_file = "SCPI_BK8616"
+
+    def __init__(self, name, address, connection_type="VISA", **connection_args) -> None:
+        super().__init__(name, address, connection_type, **connection_args)
     
     @property
     def enabled(self):
         logger.warning("Output state query not supported for BK8616; returning False.")
         return False
 
-    @property
     @enabled.setter
     def enabled(self, value: bool):
         cmd_value = "1" if value else "0"

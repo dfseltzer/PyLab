@@ -25,7 +25,7 @@ def getConnection(cnx_type):
         cnx_type = ConnectionTypes[cnx_type]
     
     if cnx_type == ConnectionTypes.VISA:
-        from .VISA import VISAConnection
+        from .visa import VISAConnection
         return VISAConnection
     elif cnx_type == ConnectionTypes.MOCK:
         from .mock import MockConnection
