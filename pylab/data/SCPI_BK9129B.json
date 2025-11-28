@@ -1,0 +1,616 @@
+{
+  "info": {
+    "device": "B&K Precision 9129B",
+    "description": "SCPI command set for the 9129B Triple Output Programmable DC Power Supply (compact short form, optional path segments omitted where unambiguous).",
+    "notes": [
+      "Short forms generally follow the examples in the programming manual (e.g. OUTP, CURR, VOLT, INST:COMB).",
+      "Optional command path segments like [:STATe] and [:ALL] are omitted from the key name where they do not affect disambiguation.",
+      "Where a command has both set and query forms (e.g. VOLT and VOLT?), they are represented with a single key, using 'set' for the non-query form and 'response' to describe the query's return value."
+    ]
+  },
+  "commands": {
+    "*PSC": {
+      "set": [
+        {
+          "type": "int",
+          "required": true,
+          "range": [
+            0,
+            1
+          ],
+          "values": [
+            0,
+            1,
+            "ON",
+            "OFF"
+          ]
+        }
+      ],
+      "query": null,
+      "response": [
+        {
+          "type": "int",
+          "required": true,
+          "range": [
+            0,
+            1
+          ]
+        }
+      ],
+      "help": "Power-on status clear. Controls whether enable registers are cleared on power up (1/ON) or preserved (0/OFF)."
+    },
+    "*SAV": {
+      "set": [
+        {
+          "type": "int",
+          "required": true,
+          "range": [
+            1,
+            9
+          ]
+        }
+      ],
+      "query": null,
+      "response": null,
+      "help": "Save current instrument setup (voltage, current, limits) to a non-volatile memory location 1\u20139."
+    },
+    "*RCL": {
+      "set": [
+        {
+          "type": "int",
+          "required": true,
+          "range": [
+            1,
+            9
+          ]
+        }
+      ],
+      "query": null,
+      "response": null,
+      "help": "Recall a previously saved setup from non-volatile memory location 1\u20139."
+    },
+    "*WAI": {
+      "set": null,
+      "query": null,
+      "response": null,
+      "help": "Wait-to-Continue. Causes the instrument to wait until all pending operations are complete before executing further commands."
+    },
+    "SYST:ERR": {
+      "set": null,
+      "query": null,
+      "response": [
+        {
+          "type": "str",
+          "required": true
+        }
+      ],
+      "help": "System error query. Returns the next error in the queue as 'code,message', or '0,No error' when queue is empty."
+    },
+    "SYST:VERS": {
+      "set": null,
+      "query": null,
+      "response": [
+        {
+          "type": "str",
+          "required": true
+        }
+      ],
+      "help": "SCPI version query. Returns the current SCPI version as a string 'YYYY.V'."
+    },
+    "SYST:REM": {
+      "set": null,
+      "query": null,
+      "response": null,
+      "help": "Enable remote mode. Locks front-panel keys except the Local key."
+    },
+    "SYST:LOC": {
+      "set": null,
+      "query": null,
+      "response": null,
+      "help": "Return control to local (front-panel) operation mode."
+    },
+    "SYST:BEEP": {
+      "set": null,
+      "query": null,
+      "response": null,
+      "help": "Trigger the instrument beeper once."
+    },
+    "OUTP": {
+      "set": [
+        {
+          "type": "bool",
+          "required": true,
+          "values": [
+            0,
+            1,
+            "ON",
+            "OFF"
+          ]
+        }
+      ],
+      "query": null,
+      "response": [
+        {
+          "type": "bool",
+          "required": true
+        }
+      ],
+      "help": "Master output control for all channels. Set form turns all outputs ON/OFF. Query form (via STATe?) returns overall output state."
+    },
+    "OUTP:STAT": {
+      "set": [
+        {
+          "type": "bool",
+          "required": true,
+          "values": [
+            0,
+            1,
+            "ON",
+            "OFF"
+          ]
+        }
+      ],
+      "query": null,
+      "response": [
+        {
+          "type": "bool",
+          "required": true
+        }
+      ],
+      "help": "Master output control for all channels. Set form turns all outputs ON/OFF. Query form (via STATe?) returns overall output state."
+    },
+    "OUTP:SER": {
+      "set": [
+        {
+          "type": "bool",
+          "required": true,
+          "values": [
+            0,
+            1,
+            "ON",
+            "OFF"
+          ]
+        }
+      ],
+      "query": null,
+      "response": [
+        {
+          "type": "bool",
+          "required": true
+        }
+      ],
+      "help": "Series mode for CH1+CH2. Set or query whether outputs 1 and 2 are combined in series."
+    },
+    "OUTP:PAR": {
+      "set": [
+        {
+          "type": "bool",
+          "required": true,
+          "values": [
+            0,
+            1,
+            "ON",
+            "OFF"
+          ]
+        }
+      ],
+      "query": null,
+      "response": [
+        {
+          "type": "bool",
+          "required": true
+        }
+      ],
+      "help": "Parallel mode for CH1+CH2. Set or query whether outputs 1 and 2 are combined in parallel."
+    },
+    "CHAN:OUTP": {
+      "set": [
+        {
+          "type": "bool",
+          "required": true,
+          "values": [
+            0,
+            1,
+            "ON",
+            "OFF"
+          ]
+        }
+      ],
+      "query": null,
+      "response": [
+        {
+          "type": "bool",
+          "required": true
+        }
+      ],
+      "help": "Per-channel output state. Controls ON/OFF for the currently selected output channel."
+    },
+    "OUTP:PROT:CLE": {
+      "set": null,
+      "query": null,
+      "response": null,
+      "help": "Clear output protection (e.g. over-voltage, over-temperature) allowing output to be re-enabled."
+    },
+    "CURR": {
+      "set": [
+        {
+          "type": "float",
+          "required": true
+        }
+      ],
+      "query": null,
+      "response": [
+        {
+          "type": "float",
+          "required": true
+        }
+      ],
+      "help": "Set or read the output current setpoint for the selected channel. Units are A; accepts numeric, MIN, MAX, DEF, etc."
+    },
+    "CURR:UP": {
+      "set": [
+        {
+          "type": "float",
+          "required": false
+        }
+      ],
+      "query": null,
+      "response": null,
+      "help": "Increase the current setpoint by one configured step, or by the specified increment if provided."
+    },
+    "CURR:DOWN": {
+      "set": [
+        {
+          "type": "float",
+          "required": false
+        }
+      ],
+      "query": null,
+      "response": null,
+      "help": "Decrease the current setpoint by one configured step, or by the specified decrement if provided."
+    },
+    "CURR:STEP": {
+      "set": [
+        {
+          "type": "float",
+          "required": true
+        }
+      ],
+      "query": null,
+      "response": [
+        {
+          "type": "float",
+          "required": true
+        }
+      ],
+      "help": "Set or query the current step size used by CURR:UP and CURR:DOWN. Units are A/mA/uA."
+    },
+    "APP:CURR": {
+      "set": [
+        {
+          "type": "float",
+          "required": true
+        },
+        {
+          "type": "float",
+          "required": true
+        },
+        {
+          "type": "float",
+          "required": true
+        }
+      ],
+      "query": null,
+      "response": [
+        {
+          "type": "float",
+          "required": true,
+          "variadic": true
+        }
+      ],
+      "help": "Apply current setpoints to all three channels simultaneously as I1,I2,I3 (A/mA/uA). Query form returns three comma-separated current setpoints."
+    },
+    "APP:OUTP": {
+      "set": [
+        {
+          "type": "bool",
+          "required": true,
+          "values": [
+            0,
+            1,
+            "ON",
+            "OFF"
+          ]
+        },
+        {
+          "type": "bool",
+          "required": true,
+          "values": [
+            0,
+            1,
+            "ON",
+            "OFF"
+          ]
+        },
+        {
+          "type": "bool",
+          "required": true,
+          "values": [
+            0,
+            1,
+            "ON",
+            "OFF"
+          ]
+        }
+      ],
+      "query": null,
+      "response": [
+        {
+          "type": "bool",
+          "required": true,
+          "variadic": true
+        }
+      ],
+      "help": "Per-channel output state for all three channels simultaneously. Takes three booleans b1,b2,b3 and returns three booleans on query."
+    },
+    "APP:VOLT": {
+      "set": [
+        {
+          "type": "float",
+          "required": true
+        },
+        {
+          "type": "float",
+          "required": true
+        },
+        {
+          "type": "float",
+          "required": true
+        }
+      ],
+      "query": null,
+      "response": [
+        {
+          "type": "float",
+          "required": true,
+          "variadic": true
+        }
+      ],
+      "help": "Apply voltage setpoints to all three channels simultaneously as V1,V2,V3 (V, mV, etc.). Query form returns three comma-separated voltages."
+    },
+    "VOLT": {
+      "set": [
+        {
+          "type": "float",
+          "required": true
+        }
+      ],
+      "query": null,
+      "response": [
+        {
+          "type": "float",
+          "required": true
+        }
+      ],
+      "help": "Set or read the output voltage setpoint for the selected channel. Units are V; accepts numeric, MIN, MAX, DEF, etc."
+    },
+    "VOLT:UP": {
+      "set": [
+        {
+          "type": "float",
+          "required": false
+        }
+      ],
+      "query": null,
+      "response": null,
+      "help": "Increase the voltage setpoint by one configured step, or by the specified increment if provided."
+    },
+    "VOLT:DOWN": {
+      "set": [
+        {
+          "type": "float",
+          "required": false
+        }
+      ],
+      "query": null,
+      "response": null,
+      "help": "Decrease the voltage setpoint by one configured step, or by the specified decrement if provided."
+    },
+    "VOLT:STEP": {
+      "set": [
+        {
+          "type": "float",
+          "required": true
+        }
+      ],
+      "query": null,
+      "response": [
+        {
+          "type": "float",
+          "required": true
+        }
+      ],
+      "help": "Set or query the voltage step size used by VOLT:UP and VOLT:DOWN. Units are kV/V/mV/uV."
+    },
+    "VOLT:LIM": {
+      "set": [
+        {
+          "type": "float",
+          "required": true
+        }
+      ],
+      "query": null,
+      "response": [
+        {
+          "type": "float",
+          "required": true
+        }
+      ],
+      "help": "Set or query the voltage limit for the selected channel. Units are kV/V/mV/uV; accepts numeric, MIN, MAX, DEF."
+    },
+    "MEAS:CURR": {
+      "set": null,
+      "query": null,
+      "response": [
+        {
+          "type": "float",
+          "required": true
+        }
+      ],
+      "help": "Measure output current on a specified or selected channel. Optional channel argument CH1|CH2|CH3|ALL; units are A."
+    },
+    "FETC:CURR": {
+      "set": null,
+      "query": null,
+      "response": [
+        {
+          "type": "float",
+          "required": true
+        }
+      ],
+      "help": "Fetch previously measured output current. Same semantics as MEAS:CURR."
+    },
+    "MEAS:VOLT": {
+      "set": null,
+      "query": null,
+      "response": [
+        {
+          "type": "float",
+          "required": true
+        }
+      ],
+      "help": "Measure output voltage on a specified or selected channel. Optional channel argument CH1|CH2|CH3|ALL; units are V."
+    },
+    "FETC:VOLT": {
+      "set": null,
+      "query": null,
+      "response": [
+        {
+          "type": "float",
+          "required": true
+        }
+      ],
+      "help": "Fetch previously measured output voltage. Same semantics as MEAS:VOLT."
+    },
+    "MEAS:POW": {
+      "set": null,
+      "query": null,
+      "response": [
+        {
+          "type": "float",
+          "required": true
+        }
+      ],
+      "help": "Measure output power on a specified or selected channel. Optional channel argument CH1|CH2|CH3|ALL; units are W."
+    },
+    "FETC:POW": {
+      "set": null,
+      "query": null,
+      "response": [
+        {
+          "type": "float",
+          "required": true
+        }
+      ],
+      "help": "Fetch previously measured output power. Same semantics as MEAS:POW."
+    },
+    "MEAS:CURR:ALL": {
+      "set": null,
+      "query": null,
+      "response": [
+        {
+          "type": "float",
+          "required": true,
+          "variadic": true
+        }
+      ],
+      "help": "Measure current of all three channels simultaneously. Returns 'I1,I2,I3' in A. Alias of MEAS:CURR:ALL?."
+    },
+    "MEAS:VOLT:ALL": {
+      "set": null,
+      "query": null,
+      "response": [
+        {
+          "type": "float",
+          "required": true,
+          "variadic": true
+        }
+      ],
+      "help": "Measure voltage of all three channels simultaneously. Returns 'V1,V2,V3' in V. Alias of MEAS:ALL?."
+    },
+    "INST:SEL": {
+      "set": [
+        {
+          "type": "str",
+          "required": true,
+          "values": [
+            "CH1",
+            "CH2",
+            "CH3"
+          ]
+        }
+      ],
+      "query": null,
+      "response": [
+        {
+          "type": "str",
+          "required": true
+        }
+      ],
+      "help": "Select active channel by name CH1|CH2|CH3. Query form returns the currently selected channel."
+    },
+    "INST:NSEL": {
+      "set": [
+        {
+          "type": "int",
+          "required": true,
+          "range": [
+            1,
+            3
+          ]
+        }
+      ],
+      "query": null,
+      "response": [
+        {
+          "type": "int",
+          "required": true
+        }
+      ],
+      "help": "Select active channel by numeric index 1\u20133. Query form returns the currently selected channel number."
+    },
+    "INST:COMB:SER": {
+      "set": null,
+      "query": null,
+      "response": [
+        {
+          "type": "str",
+          "required": true
+        }
+      ],
+      "help": "Series combination mode. Sets CH1+CH2 to series operation. Query of INST:COMB? returns current combination mode."
+    },
+    "INST:COMB:PAR": {
+      "set": null,
+      "query": null,
+      "response": [
+        {
+          "type": "str",
+          "required": true
+        }
+      ],
+      "help": "Parallel combination mode. Sets CH1+CH2 to parallel operation. Query of INST:COMB? returns current combination mode."
+    },
+    "INST:COMB:OFF": {
+      "set": null,
+      "query": null,
+      "response": [
+        {
+          "type": "str",
+          "required": true
+        }
+      ],
+      "help": "Disable series/parallel combination mode. Query of INST:COMB? returns current combination mode."
+    }
+  }
+}

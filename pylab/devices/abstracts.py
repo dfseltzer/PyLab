@@ -196,13 +196,3 @@ class SCPISource(SCPIDevice):
     @abstractmethod
     def current(self, value: float):
         pass
-
-    @property
-    @abstractmethod
-    def power(self) -> float:
-        pass
-
-    @power.setter
-    @abstractmethod
-    def power(self, value: float):
-        pass

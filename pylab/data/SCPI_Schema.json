@@ -54,37 +54,135 @@
           },
           "help": { "type": "string" }
         },
-        "additionalProperties": false
+        "additionalProperties": false,
+        "allOf": [
+          {
+            "if": { "properties": { "query": { "not": { "type": "null" } } } },
+            "then": { "properties": { "response": { "not": { "type": "null" } } } }
+          }
+        ]
       }
     }
   },
   "definitions": {
     "argArray": {
       "type": "array",
-      "items": {
-        "type": "object",
-        "properties": {
-          "type": { "type": "string", "enum": [ "bool", "int", "float", "str" ] },
-          "required": { "type": "boolean" },
-          "default": {},
-          "range": {
-            "type": "array",
+      "items": { "$ref": "#/definitions/argItem" },
+      "allOf": [
+        {
+          "if": { "minItems": 2 },
+          "then": {
             "items": [
-              { "type": [ "number", "null", "string" ] },
-              { "type": [ "number", "null", "string" ] }
+              {
+                "allOf": [
+                  { "$ref": "#/definitions/argItem" },
+                  { "properties": { "required": { "const": true } } }
+                ]
+              }
             ],
-            "minItems": 2,
-            "maxItems": 2
-          },
-          "values": {
-            "type": "array",
-            "items": { "type": [ "string", "number", "boolean" ] }
-          },
-          "variadic": { "type": "boolean" }
+            "additionalItems": { "$ref": "#/definitions/argItem" }
+          }
         },
-        "required": [ "type" ],
-        "additionalProperties": true
-      }
+        {
+          "not": {
+            "contains": {
+              "properties": { "variadic": { "const": true } },
+              "minContains": 2
+            }
+          }
+        },
+        {
+          "if": {
+            "contains": { "properties": { "variadic": { "const": true } } }
+          },
+          "then": {
+            "oneOf": [
+              {
+                "items": [],
+                "additionalItems": { "$ref": "#/definitions/argItemVariadic" },
+                "maxItems": 1
+              },
+              {
+                "items": { "$ref": "#/definitions/argItemNonVariadic" },
+                "additionalItems": false,
+                "contains": { "properties": { "variadic": { "const": true } } },
+                "allOf": [
+                  {
+                    "items": [],
+                    "additionalItems": { "$ref": "#/definitions/argItemNonVariadic" }
+                  },
+                  {
+                    "anyOf": [
+                      { "maxItems": 1 },
+                      {
+                        "items": [],
+                        "additionalItems": { "$ref": "#/definitions/argItemNonVariadic" },
+                        "minItems": 1
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "items": [
+                  { "$ref": "#/definitions/argItemNonVariadic" }
+                ],
+                "additionalItems": { "$ref": "#/definitions/argItemNonVariadic" },
+                "allOf": [
+                  {
+                    "if": { "minItems": 1 },
+                    "then": {
+                      "items": { "$ref": "#/definitions/argItemNonVariadic" },
+                      "additionalItems": {
+                        "oneOf": [
+                          { "$ref": "#/definitions/argItemNonVariadic" },
+                          { "$ref": "#/definitions/argItemVariadic" }
+                        ]
+                      }
+                    }
+                  }
+                ]
+              }
+            ]
+          }
+        }
+      ]
+    },
+    "argItem": {
+      "type": "object",
+      "properties": {
+        "type": { "type": "string", "enum": [ "bool", "int", "float", "str" ] },
+        "required": { "type": "boolean" },
+        "default": {},
+        "range": {
+          "type": "array",
+          "items": [
+            { "type": [ "number", "null", "string" ] },
+            { "type": [ "number", "null", "string" ] }
+          ],
+          "minItems": 2,
+          "maxItems": 2
+        },
+        "values": {
+          "type": "array",
+          "items": { "type": [ "string", "number", "boolean" ] }
+        },
+        "variadic": { "type": "boolean" }
+      },
+      "required": [ "type" ],
+      "additionalProperties": true
+    },
+    "argItemNonVariadic": {
+      "allOf": [
+        { "$ref": "#/definitions/argItem" },
+        { "not": { "properties": { "variadic": { "const": true } } } }
+      ]
+    },
+    "argItemVariadic": {
+      "allOf": [
+        { "$ref": "#/definitions/argItem" },
+        { "properties": { "variadic": { "const": true } } }
+      ]
     }
   }
 }

@@ -4,7 +4,7 @@ BK Precision Devices
 import logging
 logger = logging.getLogger(__name__)
 
-from .abstracts import SCPILoad
+from .abstracts import SCPILoad, SCPISource
 
 class BK8616(SCPILoad):
     command_file = "SCPI_BK8616"
@@ -82,3 +82,89 @@ class BK8616(SCPILoad):
     def power(self, value: float):
         self.write("POW", value)
     
+class BK9129B(SCPISource):
+    command_file = "SCPI_BK9129B"
+
+    def __init__(self, name, address, connection_type="VISA", **connection_args) -> None:
+        super().__init__(name, address, connection_type, **connection_args)
+    
+    @property
+    def enabled(self):
+        return self.query("OUTP:STAT?").strip()
+
+    @enabled.setter
+    def enabled(self, value: bool):
+        cmd_value = "1" if value else "0"
+        self.write("OUTP", cmd_value) 
+    
+    @property
+    def ch1_enabled(self):
+        pass
+
+    @enabled.setter
+    def ch1_enabled(self, value: bool):
+        pass
+    
+    @property
+    def ch2_enabled(self):
+        pass
+
+    @enabled.setter
+    def ch2_enabled(self, value: bool):
+        pass
+
+    @property
+    def ch3_enabled(self):
+        pass
+
+    @enabled.setter
+    def ch3_enabled(self, value: bool):
+        pass
+
+    @property
+    def voltage(self) -> float:
+        response = self.query("MEAS:VOLT")
+        if response is None:
+            logger.error("Failed to read voltage.")
+            return 0.0
+        try:
+            return float(response.strip())
+        except ValueError:
+            logger.error(f"Unexpected voltage response: {response!r}")
+            return 0.0
+    
+    @voltage.setter
+    def voltage(self, value: float):
+        self.write("VOLT:ON", value)
+
+    @property
+    def current(self) -> float:
+        response = self.query("MEAS:CURR")
+        if response is None:
+            logger.error("Failed to read current.")
+            return 0.0
+        try:
+            return float(response.strip())
+        except ValueError:
+            logger.error(f"Unexpected current response: {response!r}")
+            return 0.0
+    
+    @current.setter
+    def current(self, value: float):
+        logger.error("Current set command not supported for BK8616 in this command set.")
+    
+    @property
+    def power(self) -> float:
+        response = self.query("MEAS:POW")
+        if response is None:
+            logger.error("Failed to read power.")
+            return 0.0
+        try:
+            return float(response.strip())
+        except ValueError:
+            logger.error(f"Unexpected power response: {response!r}")
+            return 0.0
+    
+    @power.setter
+    def power(self, value: float):
+        self.write("POW", value)

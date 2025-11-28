@@ -11,28 +11,89 @@ class UnknownCommandError(KeyError):
     """
     Raised when a command is not found in the supported SCPI set.
     """
-    def __init__(self, command: str, known_commands=None):
+    def __init__(self, command: str, command_set_name=None, info=None):
         self.command = command
-        self.known_commands = list(known_commands) if known_commands is not None else []
+        self.command_set_name = command_set_name if command_set_name is not None else "Unknown Command Set"
+        self.info = info
         super().__init__(self.__str__())
 
     def __str__(self) -> str:
-        if self.known_commands:
-            sample = ", ".join(sorted(self.known_commands)[:10])
-            return f"Unknown command '{self.command}'. Known commands include: {sample}"
-        return f"Unknown command '{self.command}'."
+        return f"({self.command_set_name}) Unknown command: '{self.command}'." & (f" Additional info: {self.info}" if self.info else "")
 
 
 class CommandValidator(object):
-    def __init__(self, command_set, default_path=None) -> None:
+    def __init__(self, command_set) -> None:
         # Load common command set first, then overlay the provided device-specific commands
+        self._command_set_name = command_set
+
         self._command_set = load_data_file("SCPI_Common")["commands"]
         self._command_set.update(load_data_file(command_set)["commands"])
 
-    @property
-    def commands(self):
-        """Return the underlying command definition mapping."""
-        return self._command_set
+    def __contains__(self, command):
+        return command in self._command_set
+
+    def __call__(self, command, *args):
+        """
+        Format and validate a SCPI command. The command may end with '?' (query) or not (set).
+        Returns the full SCPI string ready to send.
+
+        NOTE: In definition of commands, an empty list means the format is supported, but that
+        there are no arguments for that format.  COnversly, a value of None (null) means that 
+        the given format is not supported.
+        """
+        is_query = command.endswith("?")
+        base = command[:-1] if is_query else command
+
+        try:
+            cmd_def = self._command_set[base]
+        except KeyError:
+            raise UnknownCommandError(command, command_set_name=self._command_set_name, info="Base command not found.")
+        arg_defs = cmd_def.get("query" if is_query else "set")
+
+        if arg_defs is None:
+            # None means not supported.  An empty list means supported but with no arguments.
+            raise UnknownCommandError(command, command_set_name=self._command_set_name, 
+                                      info="Query format not supported." if is_query else "Set format not supported.")
+
+        response_defs = cmd_def.get("response")
+        if is_query and response_defs is None:
+            raise UnknownCommandError(command, command_set_name=self._command_set_name, 
+                                      info="Command definition error: Query supported but no responce format set.")
+
+        # check edge case where no args age given, and first arg is requied
+        # The first agument will never be optional if future arguments are required.
+        if not len(args) and len(arg_defs):
+            if arg_defs[0].get("required", True):
+                raise ValueError(f"{self._command_set_name}:{command}: No arguments, but arguments requried! {arg_defs}")
+
+        # Validate arguments against definitions...
+        this_arg_def = 0
+        cleaned_args = list()
+        for this_arg_val in range(len(args)):
+            if this_arg_def >= len(arg_defs): # we ran out of definitions before we ran out of arguments... oops...
+                raise ValueError(f"{self._command_set_name}:{command}: Too many arguments supplied? {args} for {arg_defs}")
+            # check arg against matched definition
+            for this_arg_def in range(this_arg_def, len(arg_defs)):
+                is_ok = self.validate_argument(args[this_arg_val], arg_defs[this_arg_def])
+                if is_ok: # argument was OK - normalize, then exit inner loop. move onto next one.
+                    cleaned_args.append(args[this_arg_val])
+                    break
+                elif arg_defs[this_arg_def].get("required", True): # not OK, and not optional - ERROR
+                    raise ValueError(f"{self._command_set_name}:{command}: Unable to validate {args[this_arg_val]} against definition {arg_defs[this_arg_def]}")  
+                else: # not ok, but was not required. try to validate against next argument definition.
+                    pass
+            if arg_defs[this_arg_def].get("variadic", False): # accepts more than one - dont increment definition yet.
+                # these are always the last argument.
+                # because of this, edge case were there are arguments after this do not matter.
+                pass
+            else: # only accepts one of this definition, so increment to next def for next loop.
+                this_arg_def = this_arg_def+1
+            # on to the next loop... 
+
+        # Build command string
+        args_string = ",".join(str(a) for a in cleaned_args)
+        cmd_string =  f"{command} " + args_string
+        return cmd_string.strip()
 
     def get(self, command):
         """
@@ -45,157 +106,63 @@ class CommandValidator(object):
             raise KeyError(f"Command '{base}' not found in command set.")
         return self._command_set[base]
 
-    def __call__(self, command, *args):
+    def validate_argument(self, argument, argument_definition):
         """
-        Format and validate a SCPI command. The command may end with '?' (query) or not (set).
-        Returns the full SCPI string ready to send.
+        Validates a single argument against the given argument definition.  Returns True if the argument is OK,
+        and False if not.
         """
-        is_query = command.endswith("?")
-        base = command[:-1] if is_query else command
+        expected_type = argument_definition.get("type")
+        if expected_type is None:
+            raise TypeError("Argument definition missing type")
 
-        if base not in self._command_set:
-            raise UnknownCommandError(base, known_commands=self._command_set.keys())
+        if argument is None:
+            return False
 
-        cmd_def = self._command_set[base]
-        arg_defs = cmd_def.get("query" if is_query else "set")
-        if arg_defs is None:
-            raise UnknownCommandError(f"{base}{'?' if is_query else ''}", known_commands=self._command_set.keys())
-        response_defs = cmd_def.get("response")
-        # Validate query availability
-        if is_query and response_defs is None:
-            raise UnknownCommandError(f"{base}?", known_commands=self._command_set.keys())
-
-        remaining_args = list(args)
-
-        # Argument count checks
-        required_args = [a for a in arg_defs if a.get("required", False)]
-        min_args = len(required_args)
-        max_args = len(arg_defs)
-        variadic = arg_defs[-1].get("variadic", False) if arg_defs else False
-        if not variadic and not (min_args <= len(remaining_args) <= max_args):
-            raise ValueError(f"Command '{base}' expects between {min_args} and {max_args} arguments, got {len(remaining_args)}.")
-        if variadic and len(remaining_args) < min_args:
-            raise ValueError(f"Command '{base}' expects at least {min_args} arguments, got {len(remaining_args)}.")
-
-        # Type and range/value validation
-        normalized_args = []
-        for idx, arg_def in enumerate(arg_defs):
-            if idx >= len(remaining_args):
-                if arg_def.get("required", False):
-                    raise ValueError(f"Missing required argument {idx} for '{base}'.")
-                continue
-            raw_val = remaining_args[idx]
-            val = self.normalize_value(base, raw_val)
-            typ = arg_def.get("type", "str")
-            if typ == "bool":
-                if isinstance(val, (bool, int)):
-                    pass
-                elif isinstance(val, str) and val.upper() in ["ON", "OFF", "TRUE", "FALSE", "0", "1"]:
-                    pass
-                else:
-                    raise TypeError(f"Argument {idx} for '{base}' expects bool-like value, got {val!r}.")
-                normalized_args.append(val)
-            elif typ == "int":
-                if isinstance(val, str) and val in arg_def.get("values", []):
-                    ival = val  # allow token strings
-                else:
-                    try:
-                        ival = int(val)
-                    except Exception:
-                        raise TypeError(f"Argument {idx} for '{base}' expects int, got {val!r}.")
-                rng = arg_def.get("range")
-                if rng and all(isinstance(x, (int, float, type(None))) for x in rng):
-                    if (rng[0] is not None and ival < rng[0]) or (rng[1] is not None and ival > rng[1]):
-                        raise ValueError(f"Argument {idx} for '{base}' out of range {rng}: {ival}")
-                normalized_args.append(ival)
-            elif typ == "float":
-                if isinstance(val, str) and val in arg_def.get("values", []):
-                    fval = val  # allow token strings like MIN/MAX
-                else:
-                    try:
-                        fval = float(val)
-                    except Exception:
-                        raise TypeError(f"Argument {idx} for '{base}' expects float, got {val!r}.")
-                rng = arg_def.get("range")
-                if rng and all(isinstance(x, (int, float, type(None))) for x in rng):
-                    if (rng[0] is not None and fval < rng[0]) or (rng[1] is not None and fval > rng[1]):
-                        raise ValueError(f"Argument {idx} for '{base}' out of range {rng}: {fval}")
-                normalized_args.append(fval)
-            elif typ == "str":
-                if not isinstance(val, str):
-                    raise TypeError(f"Argument {idx} for '{base}' expects str, got {val!r}.")
-                vals = arg_def.get("values")
-                if vals and val not in vals:
-                    raise ValueError(f"Argument {idx} for '{base}' expects one of {vals}, got {val!r}.")
-                normalized_args.append(val)
-
-        # Build command string
-        cmd_str = base
-        args_to_use = normalized_args if normalized_args else remaining_args
-        if args_to_use:
-            if variadic:
-                fixed = len(arg_defs) - 1
-                fixed_args = args_to_use[:fixed]
-                variadic_args = args_to_use[fixed:]
-                all_args = [str(a) for a in fixed_args] + [str(a) for a in variadic_args]
-                cmd_str = f"{cmd_str} " + ",".join(all_args)
+        # Basic type validation
+        if expected_type == "bool":
+            if isinstance(argument, bool):
+                pass
+            elif isinstance(argument, (int, float)) and not isinstance(argument, bool):
+                if argument not in (0, 1):
+                    raise TypeError(f"Expected boolean-like numeric value, got {argument!r}")
+            elif isinstance(argument, str):
+                if argument.strip().upper() not in {"ON", "OFF", "0", "1", "TRUE", "FALSE"}:
+                    raise TypeError(f"Expected boolean-like string value, got {argument!r}")
             else:
-                cmd_str = f"{cmd_str} " + ",".join(str(a) for a in args_to_use)
+                raise TypeError(f"Expected boolean-like value, got {type(argument).__name__}")
+        elif expected_type == "int":
+            if isinstance(argument, bool) or not isinstance(argument, int):
+                raise TypeError(f"Expected int, got {type(argument).__name__}")
+        elif expected_type == "float":
+            if isinstance(argument, bool) or not isinstance(argument, (int, float)):
+                raise TypeError(f"Expected float, got {type(argument).__name__}")
+        elif expected_type == "str":
+            if not isinstance(argument, str):
+                raise TypeError(f"Expected str, got {type(argument).__name__}")
+        else:
+            raise TypeError(f"Unknown argument type '{expected_type}'")
 
-        if is_query and not cmd_str.endswith("?"):
-            cmd_str += "?"
-        return cmd_str
-
-    def normalize_value(self, command, value):
-        """
-        Clamp or normalize a value based on command metadata (supports MIN/MAX tokens).
-        Returns the possibly modified value.
-        """
-        is_query = command.endswith("?")
-        base = command[:-1] if is_query else command
-        if base not in self._command_set:
-            return value
-        arg_defs = self._command_set[base].get("set") or []
-        if not arg_defs:
-            return value
-        def normalize_single(arg_def, val):
-            arg_type = arg_def.get("type")
-            rng = arg_def.get("range") or [None, None]
-            # token handling
-            if isinstance(val, str) and val.upper() == "MIN" and rng[0] is not None:
-                logger.warning(f"Normalizing {command} value MIN to {rng[0]}")
-                return rng[0]
-            if isinstance(val, str) and val.upper() == "MAX" and rng[1] is not None:
-                logger.warning(f"Normalizing {command} value MAX to {rng[1]}")
-                return rng[1]
-            # numeric clamping
-            if arg_type in ("float", "int"):
-                try:
-                    num = float(val) if arg_type == "float" else int(val)
-                except Exception:
-                    return val
-                low, high = rng
-                clamped = num
-                if low is not None and num < low:
-                    logger.warning(f"Clamping {command} value {num} to min {low}")
-                    clamped = low
-                if high is not None and clamped > high:
-                    logger.warning(f"Clamping {command} value {clamped} to max {high}")
-                    clamped = high
-                # preserve expected type
-                return float(clamped) if arg_type == "float" else int(clamped)
-            return val
-
-        # normalize across all provided args
-        normalized_args = []
-        variadic = arg_defs[-1].get("variadic", False)
-        for idx, val in enumerate(value if isinstance(value, (list, tuple)) else [value]):
-            if idx < len(arg_defs):
-                normalized_args.append(normalize_single(arg_defs[idx], val))
-            elif variadic:
-                normalized_args.append(normalize_single(arg_defs[-1], val))
+        # Enumerated allowed values
+        if "values" in argument_definition and argument_definition["values"] is not None:
+            allowed = argument_definition["values"]
+            if isinstance(argument, str):
+                if not any((isinstance(v, str) and v.upper() == argument.upper()) or v == argument for v in allowed):
+                    return False
             else:
-                normalized_args.append(val)
-        if isinstance(value, (list, tuple)):
-            return type(value)(normalized_args)
-        return normalized_args[0] if normalized_args else value
+                if argument not in allowed:
+                    return False
+
+        # Numeric range validation
+        if "range" in argument_definition and argument_definition["range"] is not None:
+            try:
+                low, high = argument_definition["range"]
+            except Exception:
+                low = high = None
+            if isinstance(argument, (int, float)) and not isinstance(argument, bool):
+                if low is not None and isinstance(low, (int, float)) and argument < low:
+                    return False
+                if high is not None and isinstance(high, (int, float)) and argument > high:
+                    return False
+
+        return True
+        
