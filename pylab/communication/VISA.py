@@ -1,5 +1,15 @@
 """
-VISA based communication wrapper
+VISA (Virtual Instrument Software Architecture) communication layer.
+
+Provides the VISAConnection class for managing VISA-based instrument connections,
+including opening, closing, reading, writing, and querying instruments using the PyVISA library.
+
+These connections are subclasses of the abstract Connection class defined in connection.py.
+
+!!! ---------------------------------------
+The getConnection method should be used in almost all cases - these class should not be 
+instantiated directly.
+!!! ---------------------------------------
 """
 
 import pyvisa
@@ -150,48 +160,3 @@ class VISAConnection(Connection):
                 self._pyvisa_resource.timeout = self._timeout
             except Exception as e:
                 logger.error(f"{self}: Failed to set timout value with {e}")
-
-class VISAConnectionBlank(Connection):
-    def __init__(self, name, address, timeout=5) -> None:
-        super().__init__(name, address)
-        self._timeout = timeout
-        self._status = Status.OPEN
-        logger.info(f"[BLANK] Created VISAConnectionBlank for {name} at {address}")
-
-    def open(self) -> Status:
-        logger.info(f"[BLANK] Open called for {self}")
-        self._status = Status.OPEN
-        return self._status
-
-    def close(self) -> Status:
-        logger.info(f"[BLANK] Close called for {self}")
-        self._status = Status.CLOSED
-        return self._status
-
-    def reset(self) -> Status:
-        logger.info(f"[BLANK] Reset called for {self}")
-        self._status = Status.OPEN
-        return self._status
-
-    def read(self, value) -> str | None:
-        logger.info(f"[BLANK] Read called for {self} with value={value}")
-        return value
-
-    def write(self, command) -> bool:
-        logger.info(f"[BLANK] Write called for {self} with command={command}")
-        return True
-
-    def query(self, *args) -> str | None:
-        logger.info(f"[BLANK] Query called for {self} with args={args}")
-        return args[1] if len(args) > 1 else None
-
-    @property
-    def timeout(self) -> int | float:
-        return self._timeout
-
-    @timeout.setter
-    def timeout(self, val):
-        if val <= 0:
-            raise ValueError(f"{self}: Timeout must be > 0")
-        self._timeout = val
-        logger.info(f"[BLANK] Timeout set to {val} for {self}")

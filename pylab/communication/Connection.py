@@ -1,4 +1,9 @@
-# connection class outlines
+"""
+Base connection class and connection type management.
+
+All connections are subclasses of Connection and implement its abstract methods. Connection status is
+represented by the Status enum.  Known connection types are represented by the ConnectionTypes enum.
+"""
 
 from abc import abstractmethod
 from enum import Enum
@@ -11,6 +16,18 @@ class Status(Enum):
 
     def __bool__(self):
         return self == Status.OPEN
+
+class ConnectionTypes(Enum):
+    VISA = 0
+    MOCK = 1
+
+    @staticmethod
+    def is_known(val):
+        if isinstance(val, ConnectionTypes):
+            return True
+        if isinstance(val, str):
+            return val in ConnectionTypes.__members__
+        return False
 
 class Connection(object):
     def __init__(self, name, address) -> None:
@@ -53,3 +70,5 @@ class Connection(object):
 
     def __repr__(self) -> str:
         return f"[{type(self)}]({self.status}){self.name}:{self.address}"
+
+
