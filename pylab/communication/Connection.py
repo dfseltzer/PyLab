@@ -19,7 +19,6 @@ class Status(Enum):
 
 class ConnectionTypes(Enum):
     VISA = 0
-    MOCK = 1
 
     @staticmethod
     def is_known(val):
