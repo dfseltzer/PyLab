@@ -27,6 +27,9 @@ def getConnection(cnx_type):
     if cnx_type == ConnectionTypes.VISA:
         from .visa import VISAConnection
         return VISAConnection
+    elif cnx_type == ConnectionTypes.VISATester:
+        from .visa import VISAConnectionTester
+        return VISAConnectionTester
     
     raise NotImplementedError(f"Connection type '{cnx_type}' is not implemented.")
 

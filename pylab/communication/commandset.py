@@ -14,7 +14,6 @@ class CommandSetTypes(Enum):
             return val in CommandSetTypes.__members__
         return False
 
-
 class CommandSet(ABC):
     required_attributes = ["command_file_common"]
 

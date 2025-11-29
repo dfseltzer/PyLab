@@ -4,6 +4,9 @@ VISA (Virtual Instrument Software Architecture) communication layer.
 Provides the VISAConnection class for managing VISA-based instrument connections,
 including opening, closing, reading, writing, and querying instruments using the PyVISA library.
 
+This module also defines a placeholder class for VISA connections (VISAConnectionSim) that can 
+be used for testing purposes.
+
 These connections are subclasses of the abstract Connection class defined in connection.py.
 
 !!! ---------------------------------------
@@ -12,6 +15,7 @@ instantiated directly.
 !!! ---------------------------------------
 """
 
+import random
 import pyvisa
 import logging
 logger = logging.getLogger(__name__)
@@ -160,3 +164,76 @@ class VISAConnection(Connection):
                 self._pyvisa_resource.timeout = self._timeout
             except Exception as e:
                 logger.error(f"{self}: Failed to set timout value with {e}")
+
+class VISAConnectionTester(Connection):
+    """
+    Lightweight test double for VISA connections that mirrors the public API of VISAConnection.
+    Responses are always coerced to strings to mimic VISA behavior.
+    """
+
+    def __init__(self, name, address, timeout=5) -> None:
+        super().__init__(name, address)
+        self._timeout = timeout
+        self._response_queue = []
+
+    def open(self) -> Status:
+        logger.info(f"{self}: Opening placeholder connection")
+        self._status = Status.OPEN
+        return self._status
+
+    def close(self) -> Status:
+        logger.info(f"{self}: Closing placeholder connection")
+        self._status = Status.CLOSED
+        return self._status
+
+    def reset(self) -> Status:
+        self.close()
+        return self.open()
+
+    def read(self, *, response=None) -> str | None:
+        if not self:
+            logger.error(f"{self}: Unable to read... status is {self.status}")
+            return None
+        return self._next_response(response)
+
+    def write(self, command, *args, **kwargs) -> bool:
+        if not self:
+            logger.error(f"{self}: Unable to write to connection... status is {self.status}")
+            return False
+        logger.info(f"{self}: Placeholder write of command {command}")
+        return True
+
+    def query(self, command=None, *, response=None) -> str | None:
+        if not self:
+            logger.error(f"{self}: Status is not open - unable to query.")
+            return None
+        logger.info(f"{self}: Placeholder query for command {command}")
+        return self._next_response(response)
+
+    def queue_response(self, *responses) -> None:
+        """Append a response to the queue after coercing to string."""
+        for response in responses:
+            self._response_queue.append(self._coerce_response(response))
+
+    @property
+    def timeout(self) -> int | float:
+        return self._timeout
+    
+    @timeout.setter
+    def timeout(self, val):
+        if val <= 0:
+            raise ValueError(f"{self}: Timeout must be > 0")
+        self._timeout = val
+
+    def _next_response(self, provided) -> str:
+        if provided is not None:
+            return self._coerce_response(provided)
+        if self._response_queue:
+            return self._response_queue.pop(0)
+        fallback = random.random()
+        logger.warning(f"{self}: No response provided; returning random placeholder value {fallback}")
+        return f"{fallback}"
+
+    @staticmethod
+    def _coerce_response(response) -> str:
+        return f"{response}"
