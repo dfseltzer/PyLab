@@ -267,3 +267,63 @@ class SCPICommandSet(CommandSet):
         cmd_string =  f"{command} " + args_string
         logger.debug("SCPI command '%s' formatted as: %s", command, cmd_string.strip())
         return cmd_string.strip()
+
+    def _help_command(self, command):
+        """
+        Print detailed information about a SCPI command from the command set.
+        Does not reaise exceptions, as this is a printing function.
+        """
+        try:
+            cmd_def = self._command_set[command]
+        except KeyError:
+            print(f"Command '{command}' not found in command set '{self._command_set_name}'.")
+            return  
+        
+        print(f"Command: {command}")
+        help_text = cmd_def.get("help", "No help available.")
+        print(f"Description: {help_text}")
+        set_defs = cmd_def.get("set")
+        query_defs = cmd_def.get("query")
+        response_defs = cmd_def.get("response")
+        if set_defs is not None:
+            print("Set Format:")
+            if len(set_defs) == 0:
+                print("  (no arguments)")
+            else:
+                for idx, arg_def in enumerate(set_defs):
+                    req = "Required" if arg_def.get("required", True) else "Optional"
+                    variadic = " (Variadic)" if arg_def.get("variadic", False) else ""
+                    arg_type = arg_def.get("type", "Unknown")
+                    default = f", Default={arg_def['default']}" if "default" in arg_def and arg_def["default"] is not None else ""
+                    values = f", Values={arg_def['values']}" if "values" in arg_def and arg_def["values"] is not None else ""
+                    range_ = f", Range={arg_def['range']}" if "range" in arg_def and arg_def["range"] is not None else ""
+                    print(f"  Arg {idx+1}: Type={arg_type}{default}{values}{range_} - {req}{variadic}")
+        else:
+            print("Set format: Not supported.")
+
+        if query_defs is not None:
+            print("Query Format:")
+            if len(query_defs) == 0:
+                print("  (no arguments)")
+            else:
+                for idx, arg_def in enumerate(query_defs):
+                    req = "Required" if arg_def.get("required", True) else "Optional"
+                    variadic = " (Variadic)" if arg_def.get("variadic", False) else ""
+                    arg_type = arg_def.get("type", "Unknown")
+                    default = f", Default={arg_def['default']}" if "default" in arg_def and arg_def["default"] is not None else ""
+                    values = f", Values={arg_def['values']}" if "values" in arg_def and arg_def["values"] is not None else ""
+                    range_ = f", Range={arg_def['range']}" if "range" in arg_def and arg_def["range"] is not None else ""
+                    print(f"  Arg {idx+1}: Type={arg_type}{default}{values}{range_} - {req}{variadic}")
+        else:
+            print("Query format: Not supported.")
+
+        if response_defs is not None:
+            print("Response Format:")
+            if len(response_defs) == 0:
+                print("  (no response arguments)")
+            else:
+                for idx, arg_def in enumerate(response_defs):
+                    arg_type = arg_def.get("type", "Unknown")
+                    print(f"  Arg {idx+1}: Type={arg_type}")
+        else:
+            print("Response format: Not defined.")
