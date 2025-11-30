@@ -12,7 +12,7 @@
 #
 
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
-PYTHON_SCRIPT="$SCRIPT_DIR/scpi2json_cli.py"
+PYTHON_SCRIPT="$SCRIPT_DIR/scpi2json.py"
 
 if [ $# -lt 2 ]; then
     echo "Usage: $0 <pdf-file> <test-number>"
