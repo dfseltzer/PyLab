@@ -9,7 +9,7 @@ High-level flow:
 5. Map to a simple JSON schema and write to disk.
 
 You need to:
-- Install pdfplumber: pip install pdfplumber
+- Install PyMuPDF: pip install pymupdf
 - Implement call_llm_extract_commands() for your LLM of choice.
 """
 
@@ -18,8 +18,12 @@ import json
 from pathlib import Path
 from typing import Dict, List, Any, Tuple
 
-import pdfplumber
+try:
+    import fitz #PyMuPDF
+except ImportError:
+    raise ImportError("Please install PyMuPDF: pip install pymupdf")
 
+# examples...# ./scpi2json.py ./ProgrammingManual_BK8616.pdf -p "26-67" --debug-text
 
 # ------------- Utility: page range parsing -------------
 
@@ -47,18 +51,18 @@ def parse_page_ranges(ranges_str: str) -> List[int]:
 
 
 def get_page_count(pdf_path: Path) -> int:
-    with pdfplumber.open(pdf_path) as pdf:
-        return len(pdf.pages)
+    with fitz.open(pdf_path) as pdf:
+        return pdf.page_count
 
 
 def get_page_preview(pdf_path: Path, page_index: int, max_chars: int = 120) -> str:
     """
     page_index is 0-based.
     """
-    with pdfplumber.open(pdf_path) as pdf:
-        if page_index < 0 or page_index >= len(pdf.pages):
+    with fitz.open(pdf_path) as pdf:
+        if page_index < 0 or page_index >= pdf.page_count:
             return ""
-        text = pdf.pages[page_index].extract_text() or ""
+        text = pdf.load_page(page_index).get_text("text") or ""
     return text.strip().replace("\n", " ")[:max_chars]
 
 
@@ -68,11 +72,11 @@ def extract_text_for_pages(pdf_path: Path, pages: List[int]) -> Dict[int, str]:
     Returns {page_number: text}
     """
     page_text: Dict[int, str] = {}
-    with pdfplumber.open(pdf_path) as pdf:
+    with fitz.open(pdf_path) as pdf:
         for p in pages:
-            idx = p - 1  # pdfplumber is 0-based
-            if 0 <= idx < len(pdf.pages):
-                text = pdf.pages[idx].extract_text() or ""
+            idx = p - 1  # PyMuPDF is 0-based internally
+            if 0 <= idx < pdf.page_count:
+                text = pdf.load_page(idx).get_text("text") or ""
                 page_text[p] = text
     return page_text
 
@@ -82,7 +86,10 @@ def extract_text_for_pages(pdf_path: Path, pages: List[int]) -> Dict[int, str]:
 
 def make_chunks(page_text: Dict[int, str], max_chars: int = 4000) -> List[Dict[str, Any]]:
     """
-    Combine selected pages into chunks of at most max_chars characters.
+    Combine selected pages into chunks of roughly max_chars characters.
+
+    Each chunk overlaps the previous one by up to the last two pages so that
+    commands crossing page boundaries remain intact when sent to the LLM.
 
     Returns a list of:
       {
@@ -92,36 +99,38 @@ def make_chunks(page_text: Dict[int, str], max_chars: int = 4000) -> List[Dict[s
       }
     """
     chunks: List[Dict[str, Any]] = []
-    current_text = ""
-    current_pages: List[int] = []
+    page_entries: List[Tuple[int, str]] = []
+    current_len = 0
 
     for page in sorted(page_text.keys()):
         text = page_text[page]
         if not text:
             continue
 
-        # Start a new chunk if adding this page would exceed max_chars
-        if current_text and len(current_text) + len(text) > max_chars:
+        entry = f"\n\n---- PAGE {page} ----\n\n{text}"
+        entry_len = len(entry)
+
+        if page_entries and current_len + entry_len > max_chars:
             chunks.append(
                 {
                     "chunk_id": len(chunks),
-                    "pages": current_pages,
-                    "text": current_text,
+                    "pages": [p for p, _ in page_entries],
+                    "text": "".join(seg for _, seg in page_entries),
                 }
             )
-            current_text = ""
-            current_pages = []
+            overlap_count = min(2, len(page_entries))
+            page_entries = page_entries[-overlap_count:].copy()
+            current_len = sum(len(seg) for _, seg in page_entries)
 
-        # Add page separator markers (optional, helpful for LLM)
-        current_text += f"\n\n---- PAGE {page} ----\n\n{text}"
-        current_pages.append(page)
+        page_entries.append((page, entry))
+        current_len += entry_len
 
-    if current_text:
+    if page_entries:
         chunks.append(
             {
                 "chunk_id": len(chunks),
-                "pages": current_pages,
-                "text": current_text,
+                "pages": [p for p, _ in page_entries],
+                "text": "".join(seg for _, seg in page_entries),
             }
         )
 
@@ -133,34 +142,33 @@ def make_chunks(page_text: Dict[int, str], max_chars: int = 4000) -> List[Dict[s
 
 def call_llm_extract_commands(chunk_text: str, pages: List[int]) -> List[Dict[str, Any]]:
     """
-    Stub for LLM call.
+    Takes a chunk of text and returns a list of candidate SCPI commands.
 
-    You should implement this using your LLM of choice (e.g., OpenAI, Codex, etc.).
-    Given a chunk of text from the manual, return a list of dicts like:
+    text input is raw text extracted from the PDF pages. This text may contain
+    noise, formatting artifacts, and other non-command content.
 
+    Commands are extracted by prompting an LLM with instructions to identify SCPI commands,
+    their descriptions, and the source pages they were found on.
+
+    The returned list should contain dicts like:
+    
         [
             {
-                "command": ":SENSE:VOLTAGE:DC:RANGE",
+                "command": "[:SENSe]:VOLTage[:DC]:RANGE",
                 "description": "Sets the DC voltage measurement range.",
                 "source_pages": [11, 12],
+                "text": "full command text"
             },
             ...
         ]
 
-    Suggested prompt logic (pseudocode):
 
-    - Tell the model: "You are given raw text from a SCPI instrument manual."
-    - Ask: "Extract all SCPI commands and a short description."
-    - Define SCPI examples.
-    - Instruct: "Return ONLY JSON with a 'commands' array of objects
-      {command: str, description: str}."
-
-    Then parse the JSON and attach source_pages.
-
-    Right now this returns an empty list so the CLI still runs without an API key.
+    Note: this function does not parse commands for formatting, arguments, or other infomation.
+    It simply extracts blocks of text that appear to be SCPI commands along with their descriptions, 
+    while removing any non-command related text.
     """
-    # TODO: implement with your actual LLM client.
-    # For now, return an empty list so that the script runs.
+    # TODO: implement this function per the associated docstring.  Use openAI as the framework.
+    # You can use the openai python package or any other method to call your LLM of choice.
     return []
 
 
@@ -240,4 +248,234 @@ def interactive_review(commands: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
 
     def show_page():
         start = current_page * page_size
-        end = min(start + page_size, len_
+        end = min(start + page_size, len(commands))
+        print("")
+        print(f"Showing commands {start + 1}–{end} of {len(commands)}:")
+        print("-" * 60)
+        for idx in range(start, end):
+            c = commands[idx]
+            mark = "[x]" if selected[idx] else "[ ]"
+            print(
+                f"{mark} {idx + 1:3d}) {c['command']}  "
+                f"({', '.join(str(p) for p in c.get('source_pages', []))})"
+            )
+            if c.get("description"):
+                print(f"     {c['description']}")
+        print("-" * 60)
+        print(
+            "Commands: n=next page, p=prev page, "
+            "e=edit selection, a=accept all, d=deselect all, q=finish"
+        )
+
+    while True:
+        show_page()
+        cmd = input("> ").strip().lower()
+
+        if cmd == "n":
+            if (current_page + 1) * page_size < len(commands):
+                current_page += 1
+            else:
+                print("Already at last page.")
+        elif cmd == "p":
+            if current_page > 0:
+                current_page -= 1
+            else:
+                print("Already at first page.")
+        elif cmd == "a":
+            selected = [True] * len(commands)
+        elif cmd == "d":
+            selected = [False] * len(commands)
+        elif cmd == "e":
+            indices_str = input(
+                "Enter indices or ranges to toggle (e.g. '4, 10-12'): "
+            ).strip()
+            for part in indices_str.split(","):
+                part = part.strip()
+                if not part:
+                    continue
+                if "-" in part:
+                    a, b = part.split("-", 1)
+                    start = int(a)
+                    end = int(b)
+                    for i in range(start, end + 1):
+                        idx = i - 1
+                        if 0 <= idx < len(selected):
+                            selected[idx] = not selected[idx]
+                else:
+                    i = int(part)
+                    idx = i - 1
+                    if 0 <= idx < len(selected):
+                        selected[idx] = not selected[idx]
+        elif cmd == "q":
+            break
+        else:
+            print("Unknown command. Use n, p, e, a, d, or q.")
+
+    filtered = [c for c, keep in zip(commands, selected) if keep]
+    print(f"\nSelected {len(filtered)} out of {len(commands)} commands.")
+    return filtered
+
+
+# ------------- Schema mapping / output -------------
+
+
+def map_to_schema(commands: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
+    """
+    Map simple command dicts to a minimal JSON schema.
+
+    Example output per command:
+      {
+        "path": ":SENSE:VOLTAGE:DC:RANGE",
+        "query": true,
+        "set": false,
+        "description": "...",
+        "source_pages": [11, 12]
+      }
+    """
+    result: List[Dict[str, Any]] = []
+
+    for c in commands:
+        raw = c["command"].strip()
+        if not raw:
+            continue
+
+        is_query = raw.endswith("?")
+        path = raw[:-1] if is_query else raw
+
+        item = {
+            "path": path,
+            "query": is_query,
+            "set": not is_query,
+            "description": c.get("description", ""),
+            "source_pages": c.get("source_pages", []),
+        }
+        result.append(item)
+
+    return result
+
+
+def write_json(data: Any, out_path: Path) -> None:
+    out_path.write_text(json.dumps(data, indent=2))
+    print(f"Wrote {len(data)} commands to {out_path}")
+
+
+# ------------- CLI entrypoint -------------
+
+
+def run_cli(argv: List[str] | None = None) -> None:
+    parser = argparse.ArgumentParser(
+        description="Extract SCPI commands from a PDF manual and export to JSON."
+    )
+    parser.add_argument(
+        "pdf_path",
+        type=Path,
+        help="Path to the SCPI manual PDF.",
+    )
+    parser.add_argument(
+        "-o",
+        "--out",
+        type=Path,
+        default=Path("scpi_commands.json"),
+        help="Output JSON file path.",
+    )
+    parser.add_argument(
+        "-p",
+        "--pages",
+        type=str,
+        default="",
+        help="Page ranges containing SCPI commands, e.g. '11-35,73-80'. "
+        "If omitted, you will be prompted.",
+    )
+    parser.add_argument(
+        "--no-review",
+        action="store_true",
+        help="Skip interactive review and accept all extracted commands.",
+    )
+    parser.add_argument(
+        "--max-chars-per-chunk",
+        type=int,
+        default=4000,
+        help="Maximum characters per chunk sent to the LLM.",
+    )
+    parser.add_argument(
+        "--debug-text",
+        action="store_true",
+        help="Dump extracted text to '<out>.txt' and stop after writing.",
+    )
+
+    args = parser.parse_args(argv)
+
+    pdf_path: Path = args.pdf_path
+    out_path: Path = args.out
+    pages_str: str = args.pages
+    no_review: bool = args.no_review
+    max_chars: int = args.max_chars_per_chunk
+
+    if not pdf_path.exists():
+        raise SystemExit(f"PDF not found: {pdf_path}")
+
+    print(f"PDF: {pdf_path}")
+
+    # If no pages specified, help the user choose.
+    if not pages_str:
+        page_count = get_page_count(pdf_path)
+        print(f"PDF has {page_count} pages.")
+        pages_str = input(
+            "Enter ranges of pages that contain SCPI commands (e.g. 11-35,73-80): "
+        ).strip()
+
+    page_list = parse_page_ranges(pages_str)
+    if not page_list:
+        raise SystemExit("No valid pages specified.")
+
+    print(f"Working from {len(page_list)} pages.")
+
+    # 1) Extract text
+    page_text = extract_text_for_pages(pdf_path, page_list)
+    if not page_text:
+        raise SystemExit("No text extracted from the specified pages.")
+
+    if out_path.suffix:
+        debug_text_path = out_path.with_suffix(".txt")
+    else:
+        debug_text_path = out_path.with_name(out_path.name + ".txt")
+
+    sorted_pages = sorted(page_text.items())
+    debug_chunks = [f"---- PAGE {page} ----\n{text}" for page, text in sorted_pages]
+    debug_text_path.write_text("\n\n".join(debug_chunks))
+    print(f"Wrote extracted text to {debug_text_path}")
+
+    print(f"Extracted text from {len(page_text)} pages.")
+
+    if args.debug_text:
+        print("Debug text flag was set - exiting after writing extracted text.")
+        return
+
+    # 2) Chunk
+    chunks = make_chunks(page_text, max_chars=max_chars)
+    print(f"Created {len(chunks)} chunk(s) for LLM processing.")
+
+    # 3) LLM extraction
+    candidates = extract_commands_from_chunks(chunks)
+    print(f"LLM returned {len(candidates)} candidate command entries.")
+
+    return
+
+    # 4) Dedup
+    unique_cmds = dedupe_commands(candidates)
+    print(f"After deduplication: {len(unique_cmds)} unique commands.")
+
+    # 5) Interactive review
+    if not no_review:
+        reviewed = interactive_review(unique_cmds)
+    else:
+        reviewed = unique_cmds
+        print("Skipping interactive review (no-review mode).")
+
+    # 6) Map to schema + write JSON
+    schema_cmds = map_to_schema(reviewed)
+    write_json(schema_cmds, out_path)
+
+
+if __name__ == "__main__":
+    run_cli()

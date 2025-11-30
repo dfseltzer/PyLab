@@ -14,14 +14,14 @@
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 PYTHON_SCRIPT="$SCRIPT_DIR/scpi2json.py"
 
-if [ $# -lt 2 ]; then
-    echo "Usage: $0 <pdf-file> <test-number>"
+if [ $# -lt 1 ]; then
+    echo "Usage: $0 [<pdf-file> optional] <test-number>"
     echo "Example: $0 manual.pdf 2"
     exit 1
 fi
 
-PDF_FILE="$1"
-TEST="$2"
+TEST="$1"
+PDF_FILE="${2:-./"$(dirname "$0")"/ProgrammingManual_BK8616.pdf}"
 
 run_test_1() {
     echo "==================================================="
@@ -34,21 +34,21 @@ run_test_2() {
     echo "==================================================="
     echo " Test 2: Non-interactive run with explicit pages"
     echo "==================================================="
-    python3 "$PYTHON_SCRIPT" "$PDF_FILE" -p 10-20 -o output_commands.json --no-review
+    python3 "$PYTHON_SCRIPT" "$PDF_FILE" -p "26-74" -o output_commands.json --no-review
 }
 
 run_test_3() {
     echo "==================================================="
     echo " Test 3: Using a smaller chunk size to force more LLM requests"
     echo "==================================================="
-    python3 "$PYTHON_SCRIPT" "$PDF_FILE" -p 10-20 --max-chars-per-chunk 1000
+    python3 "$PYTHON_SCRIPT" "$PDF_FILE" -p "26-74" --max-chars-per-chunk 1000
 }
 
 run_test_4() {
     echo "==================================================="
     echo " Test 4: Full run with review disabled (batch mode)"
     echo "==================================================="
-    python3 "$PYTHON_SCRIPT" "$PDF_FILE" -p 5-15 --no-review -o batch_commands.json
+    python3 "$PYTHON_SCRIPT" "$PDF_FILE" -p "26-74" --no-review -o batch_commands.json
 }
 
 # --- Test selection logic ---
