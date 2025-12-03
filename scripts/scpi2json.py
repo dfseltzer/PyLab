@@ -32,6 +32,7 @@ def parse_page_ranges(ranges_str: str) -> List[int]:
     """
     "11-35,73-80,90" -> [11,12,...,35,73,...,80,90]
     """
+    print(f"> parse_page_ranges(ranges_str: {ranges_str})")
     pages: set[int] = set()
     for part in ranges_str.split(","):
         part = part.strip()
@@ -46,43 +47,28 @@ def parse_page_ranges(ranges_str: str) -> List[int]:
             pages.add(int(part))
     return sorted(pages)
 
-
-# ------------- PDF helpers -------------
-
-
 def get_page_count(pdf_path: Path) -> int:
+    print(f"> get_page_count(pdf_path: {pdf_path})")
     with fitz.open(pdf_path) as pdf:
         return pdf.page_count
-
-
-def get_page_preview(pdf_path: Path, page_index: int, max_chars: int = 120) -> str:
-    """
-    page_index is 0-based.
-    """
-    with fitz.open(pdf_path) as pdf:
-        if page_index < 0 or page_index >= pdf.page_count:
-            return ""
-        text = pdf.load_page(page_index).get_text("text") or ""
-    return text.strip().replace("\n", " ")[:max_chars]
-
 
 def extract_text_for_pages(pdf_path: Path, pages: List[int]) -> Dict[int, str]:
     """
     pages are 1-based page numbers from the user's perspective.
     Returns {page_number: text}
     """
+    print(f"> extract_text_for_pages(\n"+
+          f">    pdf_path: {pdf_path}\n"+
+          f">    page: {pages if len(pages) < 5 else f"[{pages[0]} ... {pages[-1]}]"}\n"+
+          f">)")
     page_text: Dict[int, str] = {}
     with fitz.open(pdf_path) as pdf:
         for p in pages:
             idx = p - 1  # PyMuPDF is 0-based internally
             if 0 <= idx < pdf.page_count:
                 text = pdf.load_page(idx).get_text("text") or ""
-                page_text[p] = text
+                page_text[p] = text # type: ignore
     return page_text
-
-
-# ------------- Chunking -------------
-
 
 def make_chunks(page_text: Dict[int, str], max_chars: int = 4000) -> List[Dict[str, Any]]:
     """
@@ -98,6 +84,7 @@ def make_chunks(page_text: Dict[int, str], max_chars: int = 4000) -> List[Dict[s
         "text": str,
       }
     """
+    print(f"> make_chunks(page_text: Dict[int, str], max_chars: {max_chars})")
     chunks: List[Dict[str, Any]] = []
     page_entries: List[Tuple[int, str]] = []
     current_len = 0
@@ -136,10 +123,6 @@ def make_chunks(page_text: Dict[int, str], max_chars: int = 4000) -> List[Dict[s
 
     return chunks
 
-
-# ------------- LLM extraction (you fill this in) -------------
-
-
 def call_llm_extract_commands(chunk_text: str, pages: List[int]) -> List[Dict[str, Any]]:
     """
     Takes a chunk of text and returns a list of candidate SCPI commands.
@@ -171,18 +154,17 @@ def call_llm_extract_commands(chunk_text: str, pages: List[int]) -> List[Dict[st
     # You can use the openai python package or any other method to call your LLM of choice.
     return []
 
-
 def extract_commands_from_chunks(chunks: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
     """
     Loop over chunks, call the LLM, and collect candidate commands.
     """
+    print(f"> extract_commands_from_chunks(chunks: List[Dict[str, Any]])")
     all_candidates: List[Dict[str, Any]] = []
 
     for chunk in chunks:
         text = chunk["text"]
         pages = chunk["pages"]
 
-        # Call your LLM here
         commands = call_llm_extract_commands(text, pages)
 
         for c in commands:
@@ -413,49 +395,45 @@ def run_cli(argv: List[str] | None = None) -> None:
 
     if not pdf_path.exists():
         raise SystemExit(f"PDF not found: {pdf_path}")
-
     print(f"PDF: {pdf_path}")
 
-    # If no pages specified, help the user choose.
+    # If no pages specified, select on command line.
     if not pages_str:
         page_count = get_page_count(pdf_path)
         print(f"PDF has {page_count} pages.")
         pages_str = input(
             "Enter ranges of pages that contain SCPI commands (e.g. 11-35,73-80): "
         ).strip()
-
     page_list = parse_page_ranges(pages_str)
+
     if not page_list:
         raise SystemExit("No valid pages specified.")
-
     print(f"Working from {len(page_list)} pages.")
 
-    # 1) Extract text
+    # Extract text from given range of pages.
     page_text = extract_text_for_pages(pdf_path, page_list)
     if not page_text:
         raise SystemExit("No text extracted from the specified pages.")
-
     if out_path.suffix:
         debug_text_path = out_path.with_suffix(".txt")
     else:
         debug_text_path = out_path.with_name(out_path.name + ".txt")
 
+    # Sort pages by page number
     sorted_pages = sorted(page_text.items())
     debug_chunks = [f"---- PAGE {page} ----\n{text}" for page, text in sorted_pages]
     debug_text_path.write_text("\n\n".join(debug_chunks))
     print(f"Wrote extracted text to {debug_text_path}")
-
     print(f"Extracted text from {len(page_text)} pages.")
 
     if args.debug_text:
-        print("Debug text flag was set - exiting after writing extracted text.")
-        return
+        SystemExit("Debug text flag was set - exiting after writing extracted text.")
 
-    # 2) Chunk
+    # Create chunks for better LLM submission... 
     chunks = make_chunks(page_text, max_chars=max_chars)
     print(f"Created {len(chunks)} chunk(s) for LLM processing.")
 
-    # 3) LLM extraction
+    # Do actual extration
     candidates = extract_commands_from_chunks(chunks)
     print(f"LLM returned {len(candidates)} candidate command entries.")
 
