@@ -3,12 +3,11 @@
 # Enhanced test script for scpi2json_cli.py
 #
 # Usage:
-#   ./test_scpi2json.sh <pdf-file> <test-number>
+#   ./test_scpi2json.sh <test-number> [<pdf-file>]
 #
 # Examples:
-#   ./test_scpi2json.sh manual.pdf 1      # Run only Test 1
-#   ./test_scpi2json.sh manual.pdf 3      # Run only Test 3
-#   ./test_scpi2json.sh manual.pdf all    # Run all tests
+#   ./test_scpi2json.sh 1                   # Run only Test 1 on default test manual
+#   ./test_scpi2json.sh all manual.pdf      # Run all tests on specified manual
 #
 
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"

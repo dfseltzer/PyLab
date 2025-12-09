@@ -385,6 +385,14 @@ def run_cli(argv: List[str] | None = None) -> None:
         help="Dump extracted text to '<out>.txt' and stop after writing.",
     )
 
+    parser.add_argument(
+        "-k",
+        "--key",
+        type=str,
+        default="",
+        help="ChatGPT API Key",
+    )
+
     args = parser.parse_args(argv)
 
     pdf_path: Path = args.pdf_path
