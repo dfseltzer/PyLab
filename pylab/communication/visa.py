@@ -74,13 +74,16 @@ class ResourceManager(object):
             raise RuntimeError(f"Unable to open resource by address: {address}")
         return resource
 
+    def list(self):
+        return self.manager.list_resources()
+
 class VISAConnection(Connection):
     def __init__(self, name, address, timeout=5) -> None:
         super().__init__(name, address)
         self._timeout = timeout
         self._pyvisa_manager = ResourceManager()
         self._pyvisa_resource = None
-    
+
     def open(self) -> Status:
         logger.info(f"{self}: Opening...")
         self._pyvisa_resource = self._pyvisa_manager.open(self.address)

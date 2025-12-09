@@ -84,12 +84,12 @@ class SCPIArgumentValueError(SCPIError):
         return base
 
 class SCPICommandSet(CommandSet):
-    command_file_common = "SCPI_Common"
+    command_file_common = "SCPI_common"
 
     def __init__(self, command_set) -> None:
         super().__init__(command_set)
   
-    def get(self, command):
+    def get(self, command, default=None):
         """
         Return the command definition for a base command (no '?' suffix).
         Raises KeyError if not present.
@@ -97,7 +97,9 @@ class SCPICommandSet(CommandSet):
         if command.endswith("?"):
             base = command[:-1]
             logger.warning(f"SCPICommandSet.get called with query command {command}; using base command {base} instead.")
-        return super().get(base)
+        else:
+            base = command
+        return super().get(base, default=default)
 
     def validate_argument(self, argument, argument_definition):
         """
