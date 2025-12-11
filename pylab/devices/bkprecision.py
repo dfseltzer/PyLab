@@ -12,9 +12,9 @@ class BK8616(Load):
     command_map = {  # type: ignore
         "enabled": ("INP", "INP?"),
         "mode": ("FUNC", "FUNC?"),
-        "voltage": ("VOLT", "MEAS:VOLT"),
-        "current": ("CURR", "MEAS:CURR"),
-        "power": ("POW", "MEAS:POW")
+        "voltage": ("VOLT", "MEAS:VOLT?"),
+        "current": ("CURR", "MEAS:CURR?"),
+        "power": ("POW", "MEAS:POW?")
     } 
 
     def __init__(self, name, address, cnx_type="VISA", cmd_type="SCPI", **cnx_args) -> None:
@@ -26,9 +26,9 @@ class BK9129B(Source):
 
     command_map = {  # type: ignore
         "enabled": ("OUTP", "OUTP:STAT?"),
-        "voltage": ("VOLT:ON", "MEAS:VOLT"),
-        "current": ("CURR", "MEAS:CURR"),
-        "power": ("POW", "MEAS:POW")
+        "voltage": ("VOLT", "MEAS:VOLT"),
+        "current": ("CURR", "MEAS:CURR?"),
+        "power": ("POW", "MEAS:POW?")
     }
         
     def __init__(self, name, address, connection_type="VISA", **connection_args) -> None:
