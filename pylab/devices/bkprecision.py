@@ -19,8 +19,7 @@ class BK8616(Load):
 
     def __init__(self, name, address, cnx_type="VISA", cmd_type="SCPI", **cnx_args) -> None:
         super().__init__(name, cnx_type, address, cmd_type, self.command_file, **cnx_args)
-
-        #self.write("POW", value)
+        
     
 class BK9129B(Source):
     command_file = "SCPI_BK9129B"  # type: ignore

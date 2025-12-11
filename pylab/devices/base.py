@@ -91,7 +91,7 @@ class Device(ABC):
 
     def command_info(self, command):
         """Return the raw command definition from the validator."""
-        return self._cmd_validator.get(command)
+        return self._cmd.get(command)
 
     def write(self, command, *args):
         """
@@ -105,7 +105,7 @@ class Device(ABC):
         Returns:
             bool: True if write succeeded, False otherwise
         """
-        cmd_str = self._cmd_validator(command, *args)
+        cmd_str = self._cmd.validate_command(command, *args)
         self._cnx.write(cmd_str)
         return True
         
