@@ -1,0 +1,1751 @@
+---- PAGE 29 ----
+29 
+*ESE <NRf> — Event Enable 
+This command programs the Standard Event Status Enable register bits. The programming determines 
+which events of the Standard Event Status Event Register (see *ESR?) are allowed to set the ESB (Event 
+Summary Bit) of the Status Byte register. A "1" in the bit position enables the corresponding event. All 
+of the enabled events of the Standard Event Status Event register are logically ORed to cause the Event 
+Summary Bit (ESB) of the Status Byte Register to be set. See 1.4 Programming the Status Registers for 
+descriptions of the Standard Event Status registers. The query reads the Standard Event Status Enable 
+register. 
+ 
+Command Syntax *ESE <NRf> 
+Parameters 0 to 255 
+Power-On Value See *PSC 
+Example *ESE 129 
+Query Syntax *ESE? 
+Returned Parameters <NR1> 
+Related Commands *ESR? *PSC *STB? 
+ 
+ 
+*ESR? 
+This query reads the Standard Event Status register. Reading the register clears it. The bit configuration 
+of this register is the same as the Standard Event Status Enable register (see *ESE). See 1.4 
+Programming the Status Registers for a detailed explanation of this register. 
+ 
+Query Syntax *ESR? 
+Parameters None 
+Returned Parameters <NR1> (register value) 
+Related Commands *CLS *ESE *ESE? *OPC 
+ 
+ 
+*IDN? 
+This query requests the electronic load to identify itself. It returns the data in four fields separated by 
+commas. 
+ 
+Query Syntax *IDN? 
+ 
+ 
+Parameters None 
+ 
+ 
+Returned Parameters <AARD> 
+Field 
+Information 
+  
+B&K Precision 
+manufacturer 
+  
+xxxxxx 
+model number 
+  
+xxxxxxxxxxxxxxxxxx serial number or 0 
+  
+x.xx 
+firmware revision 
+Example: B&K PRECISION, 8600, 600150010677510002, 1.32-1.37 
+
+
+---- PAGE 30 ----
+ 
+30 
+*OPC 
+This command causes the interface to set the OPC bit (bit 0) of the Standard Event Status register 
+when the electronic load has completed all pending operations. (See *ESE command for the bit 
+configuration of the Standard Event Status registers.) Pending operations are complete when: 
+ 
+ All commands sent before *OPC have been executed. This includes overlapped commands. 
+Most commands are sequential and are completed before the next command is executed. 
+Overlapped commands are executed in parallel with other commands. Commands that 
+affect trigger actions are overlapped with subsequent commands sent to the electronic 
+load. The *OPC command provides notification that all overlapped commands have been 
+completed. 
+ All triggered actions are completed and the trigger system returns to the Idle state. 
+ 
+*OPC does not prevent processing of subsequent commands but bit 0 will not be set until all pending 
+operations are completed. The query causes the interface to place an ASCII "1" in the Output Queue 
+when all pending operations are completed. 
+ 
+Command Syntax *OPC 
+Parameters None 
+Query Syntax *OPC? 
+Returned Parameters <NR1> 
+Related Commands *TRIG *WAI 
+ 
+ 
+*RCL 
+This command restores the electronic load to a state that was previously stored in memory with a 
+*SAV command to the specified location. All states are recalled with the following exceptions: 
+ CAL:STATe is set to OFF 
+ The trigger system is set to the Idle state by an implied ABORt command (this cancels any 
+incomplete trigger actions) 
+ 
+NOTE: The device state stored in location 0 is automatically recalled at power turn-on. 
+ 
+ 
+Command Syntax *RCL <NRf> 
+Parameters 0 to 9 
+Example *RCL3 
+Related Commands *PSC *RST *SAV 
+ 
+
+
+---- PAGE 31 ----
+31 
+*RST 
+This command resets the electronic load to the following factory-defined states: 
+CURR MIN 
+RES:TRAN:BLEV MIN 
+CURR:MODE FIX 
+RES:TRAN:BWID MIN 
+CURR:PROT:DEL 3 
+RES:TRAN:MODE CONT 
+CURR:PROT:LEV MAX 
+SENS:AVER:COUN 8 
+CURR:PROT:STAT OFF 
+SENS:AVER:STAT 1 
+CURR:RANG MAX 
+SENS:FUNC:CURR DC 
+CURR:SLEW MAX 
+SENS:NPLC 7 
+CURR:TRAN:ALEV MAX 
+SENS:VOLT:RANG:AUTO ON 
+CURR:TRAN:AWID MIN 
+TRAC:FEED TWO 
+CURR:TRAN:BLEV MIN 
+TRAC:FEED:MODE NEV 
+CURR:TRAN:BWID MIN 
+TRAC:POIN 2 
+CURR:TRAN:MODE CONT 
+TRAN OFF 
+FUNC CURR 
+TRIG:COUN 1 
+FUNC:MODE FIX 
+TRIG:DEL 0 
+INP:SHOR OFF 
+VOLT MAX 
+POW:CONF MAX 
+VOLT:ON MIN 
+POW:PROT:DEL 3 
+VOLT:ON:LATC ON 
+RES MAX 
+VOLT:RANG MAX 
+RES:RANG MAX 
+VOLT:TRAN:ALEV MAX 
+RES:TRAN:ALEV MAX 
+VOLT:TRAN:AWID MIN 
+RES:TRAN:AWID MIN 
+VOLT:TRAN:BWID MIN 
+  
+VOLT:TRAN:MODE CONT 
+ 
+NOTE:  
+ *RST does not clear any of the status registers or the error queue, and does not affect any 
+interface error conditions. 
+ *RST sets the trigger system to the Idle state. 
+ *RST clears the presently active list. 
+ 
+ 
+Command Syntax *RST 
+Parameters None 
+Related Commands *PSC *SAV 
+ 
+ 
+ 
+
+
+---- PAGE 32 ----
+ 
+32 
+*SAV 
+This command stores the present state of the electronic load to a specified location in memory. Up to 
+101 states can be stored. 
+ 
+If a particular state is desired at power-on, it should be stored in location 0. It will then be recalled at 
+power-on if the power-on state is set to RCL0. Use *RCL to retrieve instrument states. 
+ 
+Command Syntax *SAV <NRf> 
+Parameters 0 to 100 
+Example *SAV 3 
+Related Commands *PSC *RST *RCL 
+ 
+*SRE 
+This command sets the condition of the Service Request Enable register. This register determines 
+which bits from the Status Byte Register (see *STB for its bit configuration) are allowed to set the 
+Master Status Summary (MSS) bit and the Request for Service (RQS) summary bit. A 1 in any Service 
+Request Enable register bit position enables the corresponding Status Byte register bit and all such 
+enabled bits are then logically ORed to cause Bit 6 of the Status Byte Register to be set. 
+ 
+When the controller conducts a serial poll in response to SRQ, the RQS bit is cleared, but the MSS bit is 
+not. When *SRE is cleared (by programming it with 0), the electronic load cannot generate an SRQ to 
+the controller. The query returns the current state of *SRE. 
+Command Syntax *SRE <NRf> 
+Parameters 0 to 255 
+Default Value See *PSC 
+Example *SRE 128 
+Query Syntax *SRE? 
+Returned Parameters <NR1> (register binary value) 
+Related Commands *ESE *ESR *PSC 
+*STB? 
+This query reads the Status Byte register, which contains the status summary bits and the Output 
+Queue MAV bit. Reading the Status Byte register does not clear it. The input summary bits are cleared 
+when the appropriate event registers are read (see 1.4 Programming the Status Registers for more 
+information). A serial poll also returns the value of the Status Byte register, except that bit 6 returns 
+Request for Service (RQS) instead of Master Status Summary (MSS). A serial poll clears RQS, but not 
+MSS. When MSS is set, it indicates that the electronic load has one or more reasons for requesting 
+service. 
+ 
+Query Syntax *STB? 
+Parameters None 
+Returned Parameters <NR1> (register value) 
+
+
+---- PAGE 33 ----
+33 
+Related Commands *SRE *ESR *ESE 
+ 
+ 
+*TRG 
+This command generates a trigger to any system that has BUS selected as its source (for example, 
+TRIG:SOUR BUS). The command has the same effect as the Group Execute Trigger (<GET>) command. 
+ 
+Command Syntax *TRG 
+Parameters None 
+Related Commands ABOR INIT   TRIG:IMM 
+ 
+*TST? 
+This query causes the electronic load to do a self-test and report any errors. 
+ 
+Query Syntax TST? 
+ 
+Parameters None 
+ 
+Related Commands <NR1> 
+0 indicates the electronic load has passed self-
+test. Non-zero indicates an error code. 
+*WAI 
+This command instructs the electronic load not to process any further commands until all pending 
+operations are completed. Pending operations are complete when: 
+ 
+ All commands sent before *WAI have been executed. This includes overlapped commands. 
+Most commands are sequential and are completed before the next command is executed. 
+Overlapped commands are executed in parallel with other commands. Commands that affect 
+input voltage or state, relays, and trigger actions are overlapped with subsequent commands 
+sent to the electronic load. The *WAI command prevents subsequent commands from being 
+executed before any overlapped commands have been completed. 
+ All triggered actions are completed and the trigger system returns to the Idle state.  
+ 
+*WAI can be aborted only by sending the electronic load a GPIB DCL (Device Clear) command. 
+ 
+Command Syntax WAI? 
+Parameters None 
+Related Commands *OPC 
+ 
+ 
+ 
+
+
+---- PAGE 34 ----
+ 
+34 
+3.3 Subsystem Commands 
+ 
+The following is a list of the SCPI subsystem commands and the table number where each command is 
+summarized. 
+ 
+ Trigger Commands 
+ System Commands 
+ Status Commands 
+ Trace Commands 
+ Source Commands 
+ List Commands 
+ Measure Commands 
+ Sense Commands 
+ Calibrate Commands 
+General notes: 
+ Brackets ([ ]) are used to denote optional character sets. These optional characters do not have 
+to be included in the program message. Do not use brackets in the program message. 
+ Angle brackets (< >) are used to indicate parameter type. Do not use angle brackets in the 
+program message. 
+ The Boolean parameter (<b>) is used to enable or disable an instrument operation. 1 or ON 
+enables the operation and 0 or OFF disables the operation. 
+ Upper case characters indicate the short-form version for each command word. 
+ Default Parameter — Listed parameters are both the *RST and :SYSTem:PRESet defaults, unless 
+noted otherwise. Parameter notes are located at the end of each table. 
+ 
+ 
+ 
+Trigger Commands 
+The trigger subsystem is made up of a series of commands and subsystems to configure the trigger 
+model. 
+ 
+ 
+TRIGger:SOURce 
+This command selects the trigger source.  
+
+
+---- PAGE 35 ----
+35 
+BUS 
+Accepts a GPIB <GET> signal or a *TRG command as the trigger source. This 
+selection guarantees that all previous commands are complete before the trigger 
+occurs. 
+EXTernal 
+Selects the electronic load’s trigger input as the trigger source. This trigger is 
+processed as soon as it is received. 
+HOLD 
+Only the TRIG:IMM command will generate a trigger in HOLD mode. All other 
+trigger commands are ignored. 
+MANUal 
+The event occurs when the Trig key is pressed. 
+TIMer 
+This generates triggers that are in synchronization with the electronic load's 
+internal oscillator as the trigger source. The internal oscillator begins running as 
+soon as this command is executed. Use TRIG:TIM to program the oscillator period. 
+Command Syntax TRIGger:SOURce <CRD> 
+Parameters BUS | EXTernal | HOLD | MANUal | TIMer 
+*RST Value MANUal 
+Examples TRIG:SOUR  BUS   TRIG:SOUR  EXT 
+Query Syntax TRIGger:SOURce? 
+Returned Parameters <CRD> 
+Related Commands ABOR  TRIG  TRIG:DEL 
+TRIGger:TIMer 
+This command specifies the period of the triggers generated by the internal trigger generator.  
+ 
+Command Syntax TRIGger:TIMer <NRf+> 
+Parameters 1 to 999.99s | MINimum | MAXimum | DEFault 
+Unit seconds 
+*RST Value 0.001 
+Examples TRIG:TIM 0.25   TRIG:TIM MAX 
+Query Syntax TRIGger:TIMer? [ MINimum | MAXimum | DEFault ] 
+Returned Parameters <NR3> 
+Related Commands ABOR  TRIG  TRIG:SOUR  TRIG:DEL 
+ 
+ 
+ 
+ 
+System Commands 
+System commands control the system-level functions of the electronic load that are not directly 
+related to input control or measurement functions. 
+ 
+
+
+---- PAGE 36 ----
+ 
+36 
+ 
+SYSTem:PRESet 
+This command returns the instrument to states optimized for front panel operation. 
+ 
+Command Syntax SYSTem:PRESet 
+Parameters None 
+  
+SYSTem:POSetup 
+This command is used to select the power-on defaults. With RST selected, the instrument powers up to 
+the *RST default conditions. With the SAV0 parameter selected, the instrument powers-on to the 
+setup that is saved in the specified location using the *SAV command. 
+ 
+Command Syntax SYSTem:POSetup <CRD> 
+Parameters RST | SAV0 
+*RST Value RST 
+Examples SYST:POS RST 
+Query Syntax SYSTem:POSetup? 
+Returned Parameters <CRD> 
+Related Commands *RST *SAV 
+SYSTem:VERSion? 
+This query returns the SCPI version number to which the electronic load complies. The value is of the 
+form YYYY.V, where YYYY is the year and V is the revision number for that year. 
+ 
+Query Syntax SYSTem:VERSion? 
+Parameters None 
+Examples SYST:VERS? 
+Returned Parameters <NR2> 
+ 
+ 
+SYSTem:ERRor? 
+This query returns the next error number followed by its corresponding error message string from the 
+remote programming error queue. The queue is a FIFO (first-in, first-out) buffer that stores errors as 
+they occur. As it is read, each error is removed from the queue. When all errors have been read, the 
+query returns “0, No Error”. If more errors are accumulated than the queue can hold, the last error in 
+the queue is “-350, Too Many Errors”. 
+ 
+Query Syntax SYSTem:ERRor? 
+Parameters None 
+Examples SYST:ERR? 
+Returned Parameters <NR1>, <SRD> 
+
+
+---- PAGE 37 ----
+37 
+ 
+ 
+SYSTem:CLEar 
+This action command is used to clear the Error Queue of messages. 
+ 
+Command Syntax SYSTem:CLEar 
+Parameters None 
+Examples SYST:CLE 
+Related Commands SYST:ERR? 
+ 
+SYSTem:LOCal 
+This command places the electronic load in local mode during RS-232 operation. The front panel keys 
+are functional. 
+ 
+Command Syntax SYSTem:LOCal 
+Parameters None 
+Examples SYST:LOC 
+Related Commands SYST:REM  SYST:RWL 
+SYSTem:REMote 
+This command places the electronic load in remote mode during RS-232 operation. This disables all 
+front panel keys except the Local key. Pressing the Local key while in the remote state returns the front 
+panel to the local state. 
+ 
+Command Syntax SYSTem:REMote 
+Parameters None 
+Examples SYST:REM 
+Related Commands SYST:LOC  SYST:RWL 
+  
+SYSTem:RWLock 
+This command places the electronic load in remote mode during RS-232 operation. All front panel keys 
+including the Local key are disabled. Use SYSTem:LOCal to return the front panel to the local state. 
+ 
+Command Syntax SYSTem:RWLock 
+Parameters None 
+Examples SYST:RWL 
+Related Commands SYST:REM  SYST:LOC 
+ 
+ 
+
+
+---- PAGE 38 ----
+ 
+38 
+ 
+ 
+Status Commands 
+These commands program the electronic load’s status registers. The electronic load has five groups of 
+status registers: 
+ 
+1. Questionable Status 
+2. Standard Event Status 
+3. Operation Status 
+ 
+Refer to 1.4 Programming the Status Registers for more information. 
+ 
+STATus:OPERation? 
+This query returns the value of the Operation Event register. The Event register is a read-only register 
+that holds (latches) all events that are passed by the Operation NTR and/or PTR filter. Reading the 
+Operation Event register clears it.  
+Query Syntax STATus:OPERation[:EVENt]? 
+Parameters None 
+Examples STAT:OPER:EVEN? 
+Returned Parameters <NR1> (register value) 
+Related Commands *CLS 
+ 
+ 
+STATus:OPERation:CONDition? 
+This query returns the value of the Operation Condition register. This is a read-only register that holds 
+the real-time (unlatched) operational status of the electronic load.  
+ 
+Query Syntax STATus:OPERation:CONDition? 
+Parameters None 
+Examples STAT:OPER:COND? 
+Returned Parameters <NR1> (register value) 
+Related Commands STAT:QUES:COND? 
+ 
+ 
+
+
+---- PAGE 39 ----
+39 
+STATus:OPERation:ENABle 
+This command and its query can be used to set and read the value of the Operation Enable register. 
+This register is a mask for enabling specific bits from the Operation Event register to set the operation 
+summary bit (OPER) of the Status Byte register. The operation summary bit is the logical OR of all 
+enabled Operation Event register bits.  
+ 
+Command Syntax STATus:OPERation:ENABle <NR1> 
+Parameters 0 to 65535 
+Default Value 0 
+Examples STAT:OPER:ENAB 32  STAT:OPER:ENAB 1 
+Query Syntax STATus:OPERation:ENABle? 
+Returned Parameters <NR1> (register value) 
+Related Commands STAT:OPER? 
+ 
+ 
+ 
+STATus:QUEStionable? 
+This query returns the value of the Questionable Event register. The Event register is a read-only 
+register that holds (latches) all events that pass into it. Reading the Questionable Event register clears 
+it.  
+ 
+Query Syntax STATus:QUEStionable[:EVENt]? 
+Parameters None 
+Examples STAT:QUES:EVEN? 
+Returned Parameters <NR1> (register value) 
+STATus:QUEStionable:CONDition? 
+This query returns the value of the Questionable Condition register. This is a read-only register that 
+holds the real-time (unlatched) questionable status of the electronic load.  
+ 
+Query Syntax STATus:QUEStionable:CONDition? 
+Parameters None 
+Examples STAT:QUES:COND? 
+Returned Parameters <NR1> (register value) 
+Related Commands STAT:OPER:COND? 
+ 
+ 
+STATus:QUEStionable:ENABle 
+
+
+---- PAGE 40 ----
+ 
+40 
+This command sets or reads the value of the Questionable Enable register. This register is a mask for 
+enabling specific bits from the Questionable Event register to set the questionable summary (QUES) bit 
+of the Status Byte register. This bit (bit 3) is the logical OR of all the Questionable Event register bits 
+that are enabled by the Questionable Status Enable register. 
+ 
+Command Syntax STATus:QUEStionable:ENABle <NR1> 
+Parameters 0 to 65535 
+Default Value 0 
+Examples STAT:QUES:ENAB 32  STAT:QUES:ENAB 1 
+Query Syntax STATus:QUEStionable:ENABle? 
+Returned Parameters <NR1> (register value) 
+Related Commands STAT:QUES? 
+ 
+ 
+STATus:PRESet 
+When this command is sent, the SCPI event registers are affected as follows: All bits of the following 
+registers are cleared to zero (0): 
+ 
+ Questionable Event Enable Register 
+ Operation Event Enable Register 
+ 
+ 
+NOTE:  Registers not included in the list above are not affected by this command. 
+ 
+ 
+Command Syntax STATus:PRESet 
+Parameters None 
+Examples STAT:PRES 
+ 
+ 
+ 
+ 
+ 
+Trace Commands 
+The commands in this subsystem are used to configure and control data storage into the buffer. 
+ 
+ 
+TRACe:CLEar 
+
+
+---- PAGE 41 ----
+41 
+This action command is used to clear the buffer of readings. If you do not clear the buffer, a 
+subsequent store will overwrite the old readings. If the subsequent store is aborted before the buffer 
+becomes full, you could end up with some “old” readings still in the buffer. 
+ 
+Command Syntax TRACe:CLEar 
+Parameters None 
+Example TRAC:CLE 
+ 
+ 
+ 
+ 
+ 
+TRACe:FREE? 
+This command is used to read the status of storage memory. After sending this command and 
+addressing the electronic load to talk, two values separated by commas are sent to the computer. The 
+first value indicates how many bytes of memory are available, and the second value indicates how 
+many bytes are reserved to store readings. 
+ 
+Query Syntax TRACe:FREE? 
+Returned Parameters <NR1>, <NR1> 
+Examples TRAC:FREE? 
+ 
+ 
+ 
+ 
+TRACe:POINts 
+This command is used to specify the size of the buffer. 
+ 
+Command Syntax TRACe:POINts <NRf+> 
+Parameters 0 to 2000 | MINimum | MAXimum | DEFault 
+*RST Value 2000 
+Examples TRAC:POIN 10 
+Query Syntax TRACe: POINts? [ MINimum | MAXimum | DEFault ] 
+Returned Parameters <NR1> 
+Related Commands TRAC:FEED 
+TRACe:FEED 
+This command is used to select the source of readings to be placed in the buffer. With VOLTage 
+selected, voltage readings are placed in the buffer (TRAC:POIN maximum value is 2000). With CURRent 
+selected, current readings are placed in the buffer (TRAC:POIN maximum value is 2000). With TWO 
+selected, voltage and current are placed in the buffer when storage is performed (TRAC:POIN 
+maximum value is 100). 
+ 
+Command Syntax TRACe:FEED <CRD> 
+
+
+---- PAGE 42 ----
+ 
+42 
+Parameters VOLTage | CURRent | TWO 
+*RST Value TWO 
+Examples TRAC:FEED VOLT 
+Query Syntax TRACe:FEED? 
+Returned Parameters <CRD> 
+Related Commands TRAC:POIN 
+ 
+ 
+TRACe:FEED:CONTrol 
+This command is used to select the buffer control. With NEVer selected, storage into the buffer is 
+disabled. When NEXT is selected, the storage process starts, fills the buffer and then stops. The buffer 
+size is specified by the :POINts command. 
+ 
+ 
+Command Syntax TRACe:FEED:CONTrol <CRD> 
+Parameters NEVer | NEXT 
+*RST Value NEVer 
+Examples TRAC:FEED:CONT NEXT 
+Query Syntax TRACe: FEED:CONT? 
+Returned Parameters <CRD> 
+Related Commands TRAC:FEED 
+ 
+ 
+ 
+ 
+TRACe:DATA?  
+When this command is sent and the electronic load is addressed to talk, all the readings stored in the 
+buffer are sent to the computer. 
+ 
+Query Syntax TRACe:DATA? 
+Returned Parameters {<NR3>, <NR3>…etc,} or {<NR3> <NR3>, <NR3> <NR3> 
+…etc} (if TRACe:FEED TWO is set) 
+ 
+TRACe:FILTer 
+This command is used to select whether the data in buffer is filtered data. 
+ 
+Command Syntax TRACe:FILTer[:STATe] <BOOL> 
+Parameters 0  | 1 | ON | OFF 
+*RST Value OFF 
+
+
+---- PAGE 43 ----
+43 
+Examples TRAC:FILT 1 
+Query Syntax TRACe:FILTer[:STATe]? 
+Returned Parameters <NR1> 
+ 
+ 
+TRACe:DELay 
+This command is used to select the delay time for trigger in buffer. 
+ 
+Command Syntax TRACe:DELay <NRf> 
+Parameters 0 to 3600s | MINimum | MAXimum | DEFault 
+Unit S (second) 
+*RST Value 0 
+Examples TRAC:DEL 1 
+Query Syntax TRACe:DELay? [MINimum | MAXimum | DEFault] 
+Returned Parameters <NR3> 
+ 
+ 
+TRACe:TIMer 
+This command is used to select the interval for timer. 
+ 
+Command Syntax TRACe:TIMer <NRf> 
+Parameters 0.0002 to 3600s | MINimum | MAXimum | DEFault 
+Unit S (second) 
+*RST Value 1 
+Examples TRAC:TIM 0.1 
+Query Syntax TRACe:TIMer? [MINimum | MAXimum | DEFault] 
+Returned Parameters <NR3> 
+ 
+ 
+Source Commands 
+These commands control the input of the electronic load. The INPut and OUTput commands are 
+equivalent. The CURRent, RESistance, and VOLTage commands program the actual input current, 
+resistance, and voltage. 
+ 
+ 
+[SOURce:]INPut 
+
+
+---- PAGE 44 ----
+ 
+44 
+ 
+Command Syntax [SOURce:]INPut[:STATe] <bool> 
+Parameters 0 | 1 | OFF | ON 
+*RST Value OFF 
+Examples INP 1 
+Query Syntax INPut[:STATe]? 
+Returned Parameters 0 | 1 
+Related Commands *RCL  *SAV 
+ 
+ [SOURce:]INPut:SHORt 
+ 
+Command Syntax [SOURce:]INPut:SHORt[:STATe] <bool> 
+Parameters 0 | 1 | OFF | ON 
+*RST Value OFF 
+Examples INP:SHOR 1 
+Query Syntax INPut:SHORt:STATe? 
+Returned Parameters 0 | 1 
+Related Commands INP 
+ 
+ [SOURce:]REMote:SENSe 
+This command is used to select the remote measure mode for the load. 
+ 
+Command Syntax [SOURce:]REMote:SENSe[:STATe] <bool> 
+Parameters 0 | 1 | OFF | ON 
+*RST Value 0 
+Examples REM:SENS 0 
+Query Syntax [SOURce:]REMote:SENSe[:STATe]? 
+Returned Parameters <CRD> 
+ 
+ 
+[SOURce:]FUNCtion 
+This command selects the input regulation mode of the electronic load. 
+ 
+CURRent 
+constant current mode 
+RESistance  
+constant resistance mode 
+VOLTage 
+constant voltage mode 
+POWer 
+constant power mode 
+ 
+
+
+---- PAGE 45 ----
+45 
+Command Syntax [SOURce:] FUNCtion <function> 
+Parameters CURRent | RESistance | VOLTage | POWer | 
+*RST Value CURRent 
+Examples FUNC RES 
+Query Syntax [SOURce:]FUNCtion? 
+Returned Parameters <CRD> 
+ 
+ 
+[SOURce:]FUNCtion:MODE 
+This command determines whether the input regulation mode is controlled by values in a list or by the 
+FUNCtion command setting. 
+ 
+FIXed   
+The regulation mode is determined by the FUNCtion or MODE command.  
+LIST 
+ 
+The regulation mode is determined by the active list. 
+ 
+Command Syntax [SOURce:]FUNCtion:MODE <mode> 
+Parameters FIXed | LIST 
+*RST Value FIXed 
+Examples FUNC:MODE FIX 
+Query Syntax [SOURce:]FUNCtion:MODE? 
+Returned Parameters <CRD> 
+Related Commands FUNC 
+ 
+ 
+[SOURce:]TRANsient 
+This command turns the transient generator on or off. 
+ 
+Command Syntax [SOURce:]TRANsient[:STATe] <bool> 
+Parameters 0 | 1 | OFF | ON 
+*RST Value OFF 
+Examples TRAN 1 
+Query Syntax [SOURce:]TRANsient[:STATe]? 
+Returned Parameters 0 | 1 
+Related Commands CURR:TRAN:CURR:MODE   CURR:TRAN:ALEV 
+[SOURce:]PROTection:CLEar 
+This command clears the latch that disables the input when a protection condition such as overvoltage 
+(OV) or overcurrent (OC) is detected. All conditions that generated the fault must be removed before 
+the latch can be cleared. The input is then restored to the state it was in before the fault condition 
+occurred. 
+ 
+
+
+---- PAGE 46 ----
+ 
+46 
+Command Syntax [SOURce:]PROTection:CLEar 
+Parameters None 
+Examples :PROT:CLE 
+ 
+ 
+[SOURce:]INPut:TIMer 
+These commands enable or disable the electronic load on timer. 
+ 
+Command Syntax [SOURce:]INPut:TIMer[:STATe] <bool> 
+Parameters 0 | 1 | OFF | ON 
+*RST Value OFF 
+Examples INP:TIM 1 
+Query Syntax INPut:TIMer[:STATe]? 
+Returned Parameters 0 | 1 
+Related Commands INP:TIM:DEL 
+ 
+ 
+[SOURce:]INPut:TIMer:DELay 
+This command specifies the timer setting. 
+ 
+Command Syntax [SOURce:]INPut:TIMer <NRf+> 
+Parameters 1 to 60000s | MINimum | MAXimum | DEFault 
+Unit seconds 
+*RST Value 10 
+Examples INP:TIM:DEL 5 
+Query Syntax [SOURce:]INPut:TIMer:DELay? [ MINimum | MAXimum | 
+DEFault ] 
+Returned Parameters <NR3> 
+Related Commands INP:TIM 
+[SOURce:]CURRent 
+This command sets the current that the load will regulate when operating in constant current mode. 
+ 
+Command Syntax [SOURce:]CURRent[:LEVel][:IMMediate] <NRf+> 
+Parameters 0 through max rated current 
+Unit A (amps) 
+*RST Value MINimum 
+Examples CURR 5   CURR:LEV 0.5 
+Query Syntax [SOURce:]CURRent[:LEVel][:IMMediate]?  
+Returned Parameters <NR3> 
+Related Commands CURR:RANG 
+
+
+---- PAGE 47 ----
+47 
+ 
+[SOURce:]CURRent:RANGe 
+This command sets the current range of the electronic load module. There are two current ranges, high 
+range (model dependent) and low range (model dependent).  
+ 
+When you program a range value, the load automatically selects the range that corresponds to the 
+value that you program. If the value falls in a region where ranges overlap, the electronic load selects 
+the range with the highest resolution. 
+ 
+ 
+NOTE:  When this command is executed, the IMMediate, TRANsient, TRIGgered, and SLEW current 
+settings are adjusted as follows. 
+ If existing settings are within new range, no adjustment is made. 
+ If existing settings are outside new range, the levels are set to the maximum value of the new 
+range. 
+ 
+ 
+Command Syntax [SOURce:]CURRent:RANGe <NRf+> 
+Parameters 0 through max. Rated current 
+Unit A (amps) 
+*RST Value max. current (high range) 
+Examples SOUR:CURR:RANGE 5 
+Query Syntax [SOURce:]CURRent:RANGe 
+Returned Parameters <NR3> 
+Related Commands CURR  CURR:SLEW 
+ 
+[SOURce:]CURRent:SLEW 
+This command sets the slew rate for all programmed changes in the input current level of the 
+electronic load. This command programs both positive and negative slew rates. MAXimum sets the 
+slew to the fastest possible rate. MINimum sets the slew to the slowest rate. 
+ 
+Command Syntax [SOURce:]CURRent:SLEW[:BOTH] <NRf+> 
+Parameters See specifications 
+Unit A (amps per micro second) 
+Examples CURR:SLEW MAX 
+Related Commands CURR  CURR:NEG  CURR:SLEW:POS 
+ 
+ 
+ 
+
+
+---- PAGE 48 ----
+ 
+48 
+[SOURce:]CURRent:SLEW:POSitive 
+This command sets the slew rate of the current for positive transitions. MAXimum sets the slew to the 
+fastest possible rate. MINimum sets the slew to the slowest rate. 
+ 
+ 
+Command Syntax [SOURce:]CURRent:SLEW:POSitive <NRf+> 
+Parameters See specifications 
+Unit A (amps per micro second) 
+Examples CURR:SLEW:POS 0.0001 
+Query Syntax [SOURce:]CURRent:SLEW:POSitive? 
+Returned Parameters <NR3> 
+Related Commands CURR:SLEW 
+ 
+ 
+ 
+ 
+[SOURce:]CURRent:SLEW:NEGative 
+This command sets the slew rate of the current for negative transitions. MAXimum sets the slew to the 
+fastest possible rate. MINimum sets the slew to the slowest rate. 
+ 
+Command Syntax [SOURce:]CURRent:SLEW:NEGative <NRf+> 
+Parameters see specifications 
+Unit A (amps per micro second) 
+Examples CURR:SLEW:NEG 0.0001 
+Query Syntax [SOURce:]CURRent:SLEW:NEGative?  
+Returned Parameters <NR3> 
+Related Commands CURR:SLEW 
+ 
+[SOURce:]CURRent:PROTection:STATe 
+This command enables or disables the overcurrent protection feature. 
+ 
+Command Syntax [SOURce:]CURRent:PROTection:STATe <Bool> 
+Parameters 0 | 1 | OFF | ON 
+*RST Value OFF 
+Examples CURR:PROT:STAT 1 
+Query Syntax [SOURce:]CURRent:PROTection:STATe? 
+Returned Parameters <NR3> 
+Related Commands CURR:PROT 
+ 
+[SOURce:]CURRent:PROTection 
+
+
+---- PAGE 49 ----
+49 
+This command sets the soft current protection level. If the input current exceeds the soft current 
+protection level for the time specified by CURR:PROT:DEL, the input is turned off. 
+ 
+ 
+NOTE: Use CURR:PROT:DEL to prevent momentary current limit conditions caused by programmed 
+changes from tripping the overcurrent protection. 
+ 
+ 
+Command Syntax [SOURce:]CURRent:PROTection:LEVel <NRf+> 
+Parameters 0 through max. Rated current 
+Unit A (amps) 
+Examples CURR:PROT 2 
+Query Syntax [SOURce:]CURRent:PROTection:LEVel?  
+Returned Parameters <NR3> 
+Related Commands CURR:PROT:DEL   CURR:PROT:STAT 
+ 
+[SOURce:]CURRent:PROTection:DELay 
+This command specifies the time that the input current can exceed the protection level before the 
+input is turned off. 
+Command Syntax [SOURce:]CURRent:PROTection[:DELay] <NRf+> 
+Parameters 0 to 60 seconds  
+Unit seconds 
+*RST Value 0 
+Examples CURR:PROT:DEL 5 
+Query Syntax [SOURce:]CURRent:PROTection:DELay?  
+Returned Parameters <NR1> 
+Related Commands CURR:PROT   CURR:PROT:STAT 
+ 
+ 
+[SOURce:]CURRent:TRANsient:MODE 
+This command selects the operating mode of the transient generator as follows in constant current 
+mode.  
+ 
+CONTinuous The transient generator puts out a continuous pulse stream after receipt of a trigger. 
+PULSe   
+The transient generator puts out a single pulse upon receipt of a trigger. 
+TOGGle  
+The transient generator toggles between two levels upon receipt of a trigger. 
+ 
+Command Syntax [SOURce:]CURRent:TRANsient:MODE <mode> 
+Parameters CONTinuous | PULSe | TOGGle 
+*RST Value CONTinuous 
+
+
+---- PAGE 50 ----
+ 
+50 
+Examples CURR:TRAN:MODE TOGG 
+Query Syntax [SOURce:]CURRent:TRANsient:MODE? 
+Returned Parameters <CRD> 
+Related Commands CURR:TRAN:ALEV   TRAN 
+ 
+ 
+[SOURce:]CURRent:TRANsient:ALEVel 
+[SOURce:]CURRent:TRANsient:BLEVel 
+These commands specify the transient level of the input current. The transient function switches 
+between level A and level B. 
+ 
+Command Syntax [SOURce:]CURRent:TRANsient:ALEVel <NRf+>  
+[SOURce:]CURRent:TRANsient:BLEVel <NRf+> 
+Parameters 0 through max. Rated current 
+Unit A (amps) 
+Examples CURR:TRAN:ALEV 5  CURR:TRAN:BLEV 0.5 
+Query Syntax [SOURce:]CURRent:TRANsient:ALEVel? 
+[SOURce:]CURRent:TRANsient:BLEVel 
+Returned Parameters <NR3> 
+Related Commands CURR: 
+ 
+ 
+[SOURce:]CURRent:TRANsient:AWIDth 
+[SOURce:]CURRent:TRANsient:BWIDth 
+These commands specify the transient pulse width of the input current. 
+The command takes 2 parameters, first is the time and second is the unit. Both the time and the units 
+must be specified. 
+The numbers permitted also need to follow the following: 
+Milliseconds with up to 5 decimal places (6 digits total) 
+Seconds with up to 5 decimal places (6 digits total) 
+Note: For Continuous, Frequency is 1/ (Awid+Bwid) and Duty is Awid / (Awid+Bwid) 
+For pulse, pulse width = Awid 
+ 
+ 
+Command Syntax [SOURce:]CURRent:TRANsient:AWIDth <NRf+> <STR> 
+[SOURce:]CURRent:TRANsient:BWIDth <NRf+> <STR> 
+Parameters 20 uS to 3600 S, units (uS, mS or S) 
+Unit S (seconds) mS (milliseconds) uS (microseconds) 
+*RST Value 500uS 
+Examples CURR:TRAN:AWID 100 uS 
+CURR:transient bwidth 13.12345 uS 
+current:transient:awidth 3125.12 S (Seconds with up to 2 
+decimal places) 
+
+
+---- PAGE 51 ----
+51 
+Query Syntax [SOURce:]CURRent:TRANsient:AWIDth? 
+[SOURce:]CURRent:TRANsient:BWIDth 
+Returned Parameters <NR3> 
+Related Commands CURR: 
+ 
+ 
+[SOURce:]CURRent:HIGH 
+[SOURce:]CURRent:LOW 
+These commands set the high and low voltage level when the load is in constant current mode. 
+ 
+Command Syntax [SOURce:]CURRent:HIGH <NRf+>  
+[SOURce:]CURRent:LOW <NRf+> 
+Parameters see specifications for voltage range 
+Unit V (volts) 
+Examples CURR:HIGH 5 
+Query Syntax [SOURce:]CURRent:HIGH? [SOURce:]CURRent:LOW? 
+Returned Parameters <NR3> 
+ 
+ 
+ 
+[SOURce:]VOLTage 
+This command sets the voltage that the electronic load will regulate when operating in constant 
+voltage (CV) mode. 
+ 
+Command Syntax [SOURce:]VOLTage[:LEVel][:IMMediate] <NRf+> 
+Parameters See specifications for range 
+Unit V (volts) 
+Examples VOLT 5 
+Query Syntax [SOURce:]VOLTage[:LEVel][:IMMediate]?  
+Returned Parameters <NR3> 
+Related Commands VOLT:RANG 
+ 
+ 
+[SOURce:]VOLTage:RANGe 
+This command sets the voltage range of the electronic load module. There is only one voltage range. 
+ 
+Command Syntax [SOURce:] VOLTage:RANGe <NRf+> 
+Parameters see specifications for range 
+Unit V (volts) 
+Examples VOLT:RANG 15 
+
+
+---- PAGE 52 ----
+ 
+52 
+Query Syntax [SOURce:]VOLTage:RANGe?  
+Returned Parameters <NR3> 
+Related Commands VOLT 
+ 
+VOLTage:RANGe:AUTO 
+This command sets the voltage auto range state of the electronic load module. 
+ 
+Command Syntax [SOURce:]VOLTage:RANGe:AUTO<bool> 
+Parameters 0 | 1 | ON | OFF 
+*RST Value 1 
+Examples VOLT:RANG:AUTO 1 
+Query Syntax [SOURce:]VOLTage:RANGe:AUTO? 
+Returned Parameters <NR1> 
+ 
+ 
+[SOURce:]VOLTage:ON 
+This command sets the voltage of sink current on. 
+ 
+Command Syntax [SOURce:]VOLTage[:LEVel]:ON <NRf+> 
+Parameters 0 through max. rated voltage. 
+Unit V (volts) 
+Examples VOLT 5 
+Query Syntax [SOURce:]VOLTage[:LEVel]:ON?  
+Returned Parameters <NR3> 
+Related Commands VOLT:LATCh 
+ 
+[SOURce:]VOLTage:LATCh 
+This command sets the action type of Von. 
+ 
+Command Syntax [SOURce:]VOLTage:LATCh[:STATe] <b> 
+Parameters 0 | 1 | ON | OFF 
+*RST Value ON 
+Examples VOLT:LATC 1 
+Query Syntax [SOURce:] VOLTage:LATCh[:STATe]?  
+Returned Parameters 0 | 1 
+Related Commands VOLT:ON 
+ 
+[SOURce:]VOLTage:HIGH 
+
+
+---- PAGE 53 ----
+53 
+[SOURce:]VOLTage:LOW 
+These commands set the high and low current limit when the load is in constant voltage mode. 
+ 
+Command Syntax [SOURce:]VOLTage:HIGH <NRf+> 
+[SOURce:]VOLTage:LOW <NRf+> 
+Parameters 0 to max. rated current. 
+Unit A (amps) 
+Examples VOLT:HIGH 5 
+Query Syntax [SOURce:]VOLTage:HIGH?  
+[SOURce:]VOLTage:LOW?  
+ 
+[SOURce:]VOLTage:TRANsient:MODE 
+This command selects the operating mode of the transient generator as follows in constant voltage 
+mode.  
+ 
+CONTinuous The transient generator puts out a continuous pulse stream after receipt of a trigger. 
+PULSe   
+The transient generator puts out a single pulse upon receipt of a trigger. 
+TOGGle  
+The transient generator toggles between two levels upon receipt of a trigger. 
+ 
+Command Syntax [SOURce:]VOLTage:TRANsient:MODE <mode> 
+Parameters CONTinuous | PULSe | TOGGle 
+*RST Value CONTinuous 
+Examples VOLT:TRAN:MODE PULS 
+Query Syntax [SOURce:] VOLTage:TRANsient:MODE? 
+Returned Parameters <CRD> 
+Related Commands VOLT:TRAN:ALEV   TRAN 
+ 
+ 
+[SOURce:]VOLTage:TRANsient:ALEVel  
+[SOURce:]VOLTage:TRANsient:BLEVel 
+These commands specify the transient level of the input voltage. The transient function switches 
+between level A and level B. 
+ 
+Command Syntax [SOURce:]VOLTage:TRANsient:ALEVel <NRf+>  
+[SOURce:]VOLTage:TRANsient:BLEVel <NRf+> 
+Parameters 0 to max. rated voltage 
+Unit V (volts) 
+Examples VOLT:TRAN:ALEV 5  VOLT:TRAN:BLEV 0.5 
+Query Syntax [SOURce:]VOLTage:TRANsient:ALEVel? 
+[SOURce:]VOLTage:TRANsient:BLEVel?  
+
+
+---- PAGE 54 ----
+ 
+54 
+Returned Parameters <NR3> 
+Related Commands VOLT 
+ 
+[SOURce:]VOLTage:TRANsient:AWIDth 
+[SOURce:]VOLTage:TRANsient:BWIDth 
+This command specifies the transient pulse width of the input voltage. 
+The command takes 2 parameters, first is the time and second is the unit. Both the time and the units 
+must be specified. 
+Command Syntax [SOURce:]VOLTage:TRANsient:AWIDth <NRf+> <STR> 
+[SOURce:]VOLTage:TRANsient:BWIDth <NRf+> <STR> 
+Parameters 100 uS to 3600 S 
+Unit S (seconds), mS (milliseconds), or uS (microseconds) 
+*RST Value 500uS 
+Examples VOLT:TRAN:AWID 0.001 S  
+VOLT:TRAN:BWID 0.1 mS 
+Query Syntax [SOURce:] VOLTage:TRANsient:AWIDth? 
+[SOURce:]VOLTage:TRANsient:BWIDth?  
+Returned Parameters <NR3> 
+Related Commands VOLT 
+ 
+ 
+[SOURce:]RESistance 
+This command sets the resistance of the electronic load when operating in constant resistance mode. 
+ 
+Command Syntax [SOURce:]RESistance[:LEVel][:IMMediate] <NRf+> 
+Parameters 0 to max. rated resistance 
+Unit Ω (ohms) 
+Examples RES 5  RES:LEV 3.5 
+Query Syntax [SOURce:]RESistance[:LEVel][:IMMediate]?  
+Returned Parameters <NR3> 
+Related Commands RES:RANG 
+ 
+ 
+ 
+[SOURce:]RESistance: RANGe 
+This command sets the resistance range of the electronic load module. This limits the value the 
+resistance can be set to. 
+ 
+When you program a range value, the electronic load automatically selects the range that corresponds 
+to the value that you program. If the value falls in a region where ranges overlap, the electronic load 
+
+
+---- PAGE 55 ----
+55 
+selects the range with the highest resolution. 
+ 
+NOTE: When this command is executed, the IMMediate, TRANsient, TRIGgered, and SLEW resistance 
+settings are adjusted as follows. 
+If existing settings are within new range, no adjustment is made. 
+If existing settings are outside new range, the levels are set to either the maximum or minimum value 
+of the new range, depending on which they are closest to. 
+ 
+ 
+Command Syntax [SOURce:]RESistance:RANGe <NRf+> 
+Parameters 0 to max. rated resistance 
+Unit Ω (ohms) 
+Examples RES:RANG 15  SOUR:RES:RANGE 20 
+Query Syntax [SOURce:]RESistance:RANGe? 
+Returned Parameters <NR3> 
+Related Commands RES  RES:SLEW 
+ 
+ 
+
+
+---- PAGE 56 ----
+ 
+56 
+[SOURce:]RESistance:HIGH 
+[SOURce:]RESistance:LOW 
+This command is used to set the voltage high and low limit determined when the load is in constant 
+resistance mode. 
+ 
+Command Syntax [SOURce:]RESistance:HIGH <NRf+> 
+[SOURce:]RESistance:LOW <NRf+> 
+Parameters 0 to max. rated voltage 
+Unit V (volts) 
+Examples RES:HIGH 5 
+Query Syntax [SOURce:]RESistance:HIGH? 
+[SOURce:]RESistance:LOW? 
+Returned Parameters <NR3> 
+ 
+ 
+[SOURce:]RESistance:TRANsient:MODE 
+This command selects the operating mode of the transient generator as follows in constant resistance 
+mode. 
+ 
+CONTinuous The transient generator puts out a continuous pulse stream upon receipt of a trigger. 
+PULSe   
+The transient generator puts out a single pulse upon receipt of a trigger. 
+TOGGle  
+The transient generator toggles between two levels upon receipt of a trigger. 
+ 
+Command Syntax [SOURce:]RESistance:TRANsient:MODE <mode> 
+Parameters CONTinuous | PULSe | TOGGle 
+*RST Value CONTinuous 
+Examples RES:TRAN:MODE PULS 
+Query Syntax [SOURce:]RESistance:TRANsient:MODE? 
+Returned Parameters <CRD> 
+Related Commands RES:TRAN:ALEV   TRAN 
+  
+ 
+ 
+
+
+---- PAGE 57 ----
+57 
+[SOURce:]RESistance:TRANsient:ALEVel 
+[SOURce:]RESistance:TRANsient:BLEVel 
+This command specifies the transient level of the input resistance. The transient function switches 
+between level A and level B. 
+ 
+Command Syntax [SOURce:]RESistance:TRANsient:ALEVel <NRf+>  
+[SOURce:]RESistance:TRANsient:BLEVel <NRf+> 
+Parameters 0 to max. rated resistance. 
+Unit Ω (ohms) 
+Examples RES:TRAN:ALEV 5  RES:TRAN:BLEV 0.5 
+Query Syntax [SOURce:]RESistance:TRANsient:ALEVel? 
+[SOURce:]RESistance:TRANsient:BLEVel?  
+Returned Parameters <NR3> 
+Related Commands RES 
+ 
+[SOURce:]RESistance:TRANsient:AWIDth 
+[SOURce:]RESistance:TRANsient:BWIDth 
+This command specifies the transient pulse width of the input resistance. 
+Like the transient A and B widths of CC and CV modes, this command takes 2 parameters, the time and 
+the units. The precision depends on the number of digits used. That means you can specify 12.45 
+seconds, but not 3021.4534 seconds, the last digit will be rounded (3031.45 in this case). 
+ 
+Command Syntax [SOURce:]RESistance:TRANsient:AWIDth <NRf+> <STR> 
+[SOURce:]RESistance:TRANsient:BWIDth <NRf+> <STR> 
+Parameters 100 uS to 3600 S 
+Unit S (second), mS (millisecond), or uS (microsecond) 
+*RST Value 500 uS 
+Examples RES:TRAN:AWID 0.001 S 
+RES:TRAN:BWID 10.5 mS 
+resistance:transient:bwidth 123.45 S 
+res:tran:bwidth 200 uS 
+Query Syntax [SOURce:]RESistance:TRANsient:AWIDth? 
+[SOURce:]RESistance:TRANsient:BWIDth?  
+Returned Parameters <NR3> 
+Related Commands RES 
+ 
+[SOURce:] RESistance:VDRop 
+ 
+This command sets the LED cut-off voltage value when LED test function is ON. 
+
+
+---- PAGE 58 ----
+ 
+58 
+Command Syntax [SOURce:] RESistance:VDRop <NRf+> 
+Parameters 0 through MAX | MINimum | MAXimum | DEFault 
+Unit V (volts) 
+*RST Value MINimum 
+Examples RES:VDR 5 
+Query Syntax [SOURce:] RESistance:VDRop? [ MINimum | 
+MAXimum | DEFault ] 
+Returned Parameters <NR3> 
+Related Commands VOLT:VDR 
+ 
+ 
+[SOURce:] RESistance:LED[:STATe] 
+ 
+This command enables or disables the LED test selection in constant resistence mode. 
+ 
+Command Syntax [SOURce:]VOLTage:LED[:STATe] <b> 
+Parameters 0 | 1 | ON | OFF 
+*RST Value ON 
+Examples VOLT:LED 1 
+Query Syntax [SOURce:]VOLTage:LED[:STATe]? 
+Returned Parameters 0 | 1 
+ 
+ 
+[SOURce:]POWer 
+This command sets the power of the load when operating in constant power mode. 
+ 
+Command Syntax [SOURce:]POWer[:LEVel][:IMMediate] <NRf+> 
+Parameters 0 to max. rated power 
+Unit W (power) 
+*RST Value MINimum 
+Examples POW 5 POW:LEV 3.5 
+Query Syntax [SOURce:]POWer[:LEVel][:IMMediate]?  
+Returned Parameters <NR3> 
+Related Commands POW:RANG 
+ 
+ 
+ 
+[SOURce:]POWer:RANGe 
+This command sets the power range of the load.  This limits the settable range for power. 
+ 
+
+
+---- PAGE 59 ----
+59 
+Command Syntax [SOURce:]POWer:RANGe <NRf+> 
+Parameters 0 to max. rated power. 
+Unit W (power) 
+Examples POW:RANG 15 SOUR:POW:RANGE MIN 
+Query Syntax [SOURce:]POWer:RANGe?  
+Returned Parameters <NR3> 
+ 
+ 
+[SOURce:]POWer:HIGH 
+[SOURce:]POWer:LOW 
+This command sets the voltage high and low limit determined when in constant power mode. 
+ 
+Command Syntax [SOURce:]POWer:HIGH <NRf+> 
+[SOURce:]POWer:LOW <NRf+> 
+Parameters 0 to max. rated voltage 
+Unit V (volts) 
+Examples POW:HIGH 5 
+Query Syntax [SOURce:]POWer:HIGH?  [SOURce:]POWer:LOW?  
+Returned Parameters <NR3> 
+ 
+[SOURce:] POWer:TRANsient:MODE 
+This command selects the operating mode of the transient generator as follows in constant power 
+mode. 
+ 
+CONTinuous The transient generator puts out a continuous pulse stream upon receipt of a trigger. 
+PULSe   
+The transient generator puts out a single pulse upon receipt of a trigger. 
+TOGGle  
+The transient generator toggles between two levels upon receipt of a trigger. 
+ 
+Command Syntax [SOURce:]RESistance:TRANsient:MODE <mode> 
+Parameters CONTinuous | PULSe | TOGGle 
+*RST Value CONTinuous 
+Examples RES:TRAN:MODE PULS 
+Query Syntax [SOURce:]RESistance:TRANsient:MODE? 
+Returned Parameters <CRD> 
+Related Commands RES:TRAN:ALEV   TRAN 
+  
+ 
+ 
+
+
+---- PAGE 60 ----
+ 
+60 
+[SOURce:]POWer:TRANsient:ALEVel 
+[SOURce:]POWer:TRANsient:BLEVel 
+This command specifies the transient level of the input power. The transient function switches 
+between level A and level B. 
+ 
+Command Syntax [SOURce:]POWer:TRANsient:ALEVel <NRf+>  
+[SOURce:]POWer:TRANsient:BLEVel <NRf+> 
+Parameters M0 to max. rated power. 
+Unit Watts 
+Examples POW:TRAN:ALEV 5  POW:TRAN:BLEV 0.5 
+Query Syntax [SOURce:]POWer:TRANsient:ALEVel? 
+[SOURce:]POWer:TRANsient:BLEVel?  
+Returned Parameters <NR3> 
+Related Commands RES 
+ 
+[SOURce:]POWer:TRANsient:AWIDth 
+[SOURce:]POWer:TRANsient:BWIDth 
+This command specifies the transient pulse width of the input resistance. 
+Like the transient A and B widths of CC and CV modes, this command takes 2 parameters, the time and 
+the units. The precision depends on the number of digits used. That means you can specify 12.45 
+seconds, but not 3021.4534 seconds, the last digit will be rounded (3031.45 in this case). When the 
+unit is S, the unit is optional. 
+ 
+Command Syntax [SOURce:]POWer:TRANsient:AWIDth <NRf+> <STR> 
+[SOURce:]POWer:TRANsient:BWIDth <NRf+> <STR> 
+Parameters 100 uS to 3600 S 
+Unit S (second) (optional), mS (millisecond), or uS 
+(microsecond) 
+*RST Value 500 uS 
+Examples POW:TRAN:AWID 0.001 S 
+POW:TRAN:BWID 10.5 mS 
+resistance:transient:bwidth 123.45 S 
+res:tran:bwidth 200 uS 
+Query Syntax SOURce:]POWer:TRANsient:AWIDth? 
+[SOURce:]POWer:TRANsient:BWIDth?  
+Returned Parameters <NR3> 
+Related Commands POW 
+ 
+
+
+---- PAGE 61 ----
+61 
+[SOURce:]POWer:PROTection 
+This command sets the soft power protection level. If the input power exceeds the soft power 
+protection level for the time specified by POW:PROT:DEL, the input is turned off. 
+ 
+ 
+NOTE: Use POW:PROT:DEL to prevent momentary power limit conditions caused by programmed 
+changes from tripping the overpower protection. 
+ 
+ 
+Command Syntax [SOURce:]POWer:PROTection[:LEVel] <NRf+> 
+Parameters 0 to max. rated power 
+Unit W (power) 
+*RST Value MAXimum 
+Examples POW:PROT 100 
+Query Syntax [SOURce:]POWer:PROTection[:LEVel]?  
+Returned Parameters <NR3> 
+Related Commands POW:PROT:DEL 
+ 
+ 
+[SOURce:]POWer:PROTection:DELay 
+This command specifies the time that the input power can exceed the protection level before the input 
+is turned off. 
+ 
+Command Syntax [SOURce:]POWer:PROTection:DELay] <NRf+> 
+Parameters 0 to 60 seconds  
+Unit seconds 
+*RST Value 0 
+Examples POW:PROT:DEL 5 
+Query Syntax [SOURce:]POWer:PROTection:DELay?  
+Returned Parameters <NR1> 
+Related Commands POW:PROT 
+ 
+ 
+ 
+ 
+[SOURce:]POWer:CONFig 
+This command sets the hard power protection level. 
+ 
+Command Syntax [SOURce:]POWer:CONFig[:LEVel] <NRf+> 
+Parameters 0 through max. Rated power 
+Unit W (power) 
+Examples POW:CONFig 100 
+
+
+---- PAGE 62 ----
+ 
+62 
+Query Syntax [SOURce:]POWer:CONFig[:LEVel 
+Returned Parameters <NR3> 
+Related Commands POW:PROT 
+ 
+List Commands 
+List commands allow you to program complex sequences of input changes with rapid, precise timing, 
+and synchronized with trigger signals. Each function for which lists can be generated has a list of values 
+that specify the input at each list step. 
+ 
+ 
+ 
+[SOURce:]LIST:RANGe 
+This command sets the current range for list mode.  It also limits the maximum settable current.  
+Depending on the value, range will automatically switch between high or low depending on which 
+gives the best resolution and accuracy. 
+ 
+Command Syntax [SOURce:]LIST:RANGe <NRf> 
+Parameters 0 to max. rated current. 
+Unit None 
+Examples LIST:RANGE 30 
+Query Syntax [SOURce:]LIST:RANGe? 
+Returned Parameters <NR3> 
+Related Commands LIST:LEV 
+ 
+ 
+[SOURce:]LIST:SLOWrate[:STATe] 
+This command sets the mode of the slew rate between high-rate and low-rate.  When set to high-rate, 
+the slew rate set by [SOURce:]LIST:SLEW command will be in A/us unit.  When in low-rate, it will be set 
+to A/ms unit. 
+ 
+Command Syntax [SOURce:]LIST:SLOWrate[:STATe] <0,1> 
+Parameters 0 – High-rate 
+1 – Low-rate 
+Unit None 
+Examples LIST:SLOW 1 
+Query Syntax [SOURce:]LIST:SLOWrate[:STATe]? 
+Returned Parameters <0 or 1> 
+Related Commands LIST:SLEW 
+ 
+
+
+---- PAGE 63 ----
+63 
+[SOURce:]LIST:COUNt 
+This command sets the number of times that the list is executed before it is completed. The command 
+accepts parameters in the range 1 through 65536, but 65536 is interpreted as infinity. 
+ 
+ 
+Command Syntax [SOURce:]LIST:COUNt <NRf+> 
+Parameters 1 to 65536  
+Examples LIST:COUN 3 
+Query Syntax [SOURce:]LIST:COUNt? 
+Returned Parameters <NR3> 
+Related Commands LIST:STEP 
+ 
+ 
+ 
+[SOURce:]LIST:STEP 
+This command sets the total number of steps in the list. 
+ 
+Command Syntax [SOURce:]LIST:STEP <NRf+> 
+Parameters 2 to 84 
+Examples LIST:STEP 5 
+Query Syntax [SOURce:]LIST:STEP? 
+Returned Parameters <NR3> 
+Related Commands LIST:LEV 
+ 
+[SOURce:]LIST:LEVel? 
+This command specifies the level value 
+ 
+Command Syntax [SOURce:]LIST:LEVel <NR1>, <NRf> 
+Parameters 1 to max. rated current. 
+Unit None, None 
+Examples LIST:LEV 1, 10 LIST:LEV 2, 15.2 
+Query Syntax [SOURce:]LIST:LEVel? <NR1> 
+<NR1> is step number 
+Returned Parameters <NR3> 
+Related Commands LIST:RANG 
+ 
+[SOURce:]LIST:SLEW 
+
+
+---- PAGE 64 ----
+ 
+64 
+This command sets the slew rate for each step. This command programs both positive and negative 
+going slew rates. MAXimum sets the slew to its fastest possible rate. MINimum sets the slew to its 
+slowest rate. 
+ 
+Command Syntax [SOURce:]LIST:SLEW <NR1>, <NRf> 
+Parameters See specifications for range 
+Unit Unit is determined by [SOURce:]LIST:SLOWrate[:STATe] 
+command.  It will be in A/us or A/ms if high-rate or low-
+rate is set respectively. 
+Examples LIST:SLEW 1, 1.5   LIST:SLEW 2, MAX 
+Query Syntax [SOURce:]LIST:SLEW? <NR1> 
+<NR1> is step number 
+Returned Parameters <NR3> 
+Related Commands CURR:SLEW 
+ 
+[SOURce:]LIST:WIDth 
+This command sets the sequence of list dwell times. Each value represents the time in seconds that the 
+input will remain at the particular list step point before completing the step. If times exceed 16383S, 
+the input remains at the present level until a trigger sequences the next point in the list. Else At the 
+end of the dwell time, the input automatically changes to the next point in the list. 
+ 
+Command Syntax [SOURce:]LIST:WIDth <NR1>, <NRf> 
+Parameters 20 us to 3600 s 
+Unit  s (seconds) 
+Examples LIST:WID 1, 0.02   LIST:WID 2, 0.5 
+Query Syntax [SOURce:]LIST:WIDth? <NR1> 
+<NR1> is step number 
+Returned Parameters <NR3> 
+ 
+ 
+[SOURce:]LIST:SAV 
+This command stores the present list file of the electronic load to a specified location in memory. Up to 
+5 files can be stored. Files saved in locations 1-5 are nonvolatile and the data will be saved when power 
+is removed. 
+ 
+ 
+Command Syntax [SOURce:]LIST:SAV <NR1> 
+Parameters 1 to 5 
+Examples LIST:SAV 3 
+Related Commands LIST:RCL 
+ 
+
+
+---- PAGE 65 ----
+65 
+ 
+ 
+[SOURce:]LIST:RCL 
+This command restores a list file that was previously stored in memory with a LIST:SAV command to 
+the specified location. 
+ 
+Command Syntax [SOURce:]LIST:RCL <NR1> 
+Parameters 1 to 5 
+Examples LIST:RCL 3 
+Related Commands LIST:SAV 
+ 
+ 
+Measurement Commands 
+The signal-oriented measurement commands are used to acquire readings. You can use these high-
+level instructions to control the measurement process. 
+ 
+Making Measurements 
+The electronic load has the ability to make several types of voltage or current measurements. The 
+measurement capabilities of the electronic load are particularly useful with applications that draw 
+current in pulses. 
+ 
+All measurements are performed by digitizing the instantaneous input voltage or current for a defined 
+number of samples and sample interval, storing the results in a buffer, and then calculating the 
+measured result. Many parameters of the measurement are programmable. These include the number 
+of samples, the time interval between samples, and the method of triggering. Note that there is a 
+tradeoff between these parameters and the speed, accuracy, and stability of the measurement in the 
+presence of noise. 
+ 
+There are two ways to make measurements: 
+ 
+1) Use the MEASure commands to immediately start acquiring new voltage or current data, 
+and return measurement calculations from this data as soon as the buffer is full. This is the 
+easiest way to make measurements, since it requires no explicit trigger programming. 
+2) Use an acquisition trigger to acquire the data. Then use the FETCh commands to return 
+calculations from the data that was retrieved by the acquisition trigger. This method gives 
+you the flexibility to synchronize the data acquisition with a trigger. FETCh commands do 
+not trigger the acquisition of new measurement data, but they can be used to return many 
+different calculations from the data that was retrieved by the acquisition trigger. 
+Making triggered measurements with the acquisition trigger system is discussed in the User Manual. 
+
+
+---- PAGE 66 ----
+ 
+66 
+ 
+NOTE: For each MEASure form of the query, there is a corresponding query that begins with the 
+header FETCh. FETCh queries perform the same calculation as their MEASure counterparts, but do not 
+cause new data to be acquired. Data acquired by an explicit trigger or a previously programmed 
+MEASure command are used. 
+ 
+ 
+:FETCh:VOLTage? 
+:FETCh:CURRent? 
+:FETCh:POWer[:DC]? 
+ 
+These query commands request the latest post-processed readings stored in the sample buffer. After 
+sending this command and addressing the electronic load to talk, the readings are sent to the 
+computer. This command does not affect the instrument setup. This command does not trigger source-
+measure operations; it simply requests the last available readings. Note that this command can 
+repeatedly return the same readings. Until there are new readings, this command continues to return 
+the old readings.  
+ 
+For example, assume that the electronic load performed 20 measure operations. The :FETCh:VOLTage? 
+command will request the readings for those 20 measure operations. If :FETCh:VOLTage? is sent while 
+performing measure operations (ARM annunciator on), it will not be executed until the electronic load 
+goes back to the idle state. 
+ 
+ 
+:MEASure:VOLTage[:DC]? 
+:MEASure:CURRent[:DC]? 
+These commands combine other signal-oriented measurement commands to perform a “one-shot” 
+measurement and acquire the reading. Note that if a function is not specified, the measurement will 
+be done on the function that is presently selected. 
+ 
+ 
+ 
+ 
+ 
+ 
+Sense Commands 
+The Sense subsystem is used to configure and control the measurement functions of the electronic 
+load. A function does not have to be selected before you program its various configurations. A function 
+can be selected any time after it has been programmed. Whenever a programmed function is selected, 
+it assumes the programmed states. 
+
+
+---- PAGE 67 ----
+67 
+ 
+ 
+SENSe:AVERage:COUNt 
+The command is used to specify the filter count. In general, the filter count is the number of readings 
+that are acquired and stored in the filter buffer for the averaging calculation. The larger the filter 
+count, the more filtering that is performed. 
+ 
+Command Syntax SENSe:AVERage:COUNt <NRf+> 
+Parameters 2 to 16 
+*RST Value 8 
+Examples SENS:AVER:COUN 10 
+Query Syntax SENSe:AVERage:COUNt?  
+Returned Parameters <NR1> 
+Related Commands SENS:AVER  
+ 
+ 
+3.4 SCPI Command Tree 
+ 
+TRACe Command Summary 
+Commands 
+Description 
+Default 
+:TRACe 
+ 
+ 
+    :CLEar 
+Clear readings from buffer. 
+ 
+    :FREE? 
+Query points available and points in use. 
+ 
+    :POINts <n> 
+Specify size of buffer (2 to 1024). 
+2 
+    :POINts? 
+Query buffer size. 
+ 
+    :FEED <name> 
+Select source of readings (VOLTage, CURRent, 
+TWO). 
+TWO 
+        :CONTrol <name> 
+Select buffer control mode (NEVer or NEXT). 
+NEVer 
+        :CONTrol? 
+Query buffer control mode. 
+ 
+    :FEED? 
+Query source of readings for buffer. 
+ 
+    :FILTer 
+ 
+ 
+        [:STATe] 
+Select the type of buffer data 
+OFF 
+        [:STATe]? 
+Query the type of buffer data 
+ 
+    :DELay <n> 
+Set the trigger delay time 
+0 
+        :DELay? 
+Query the trigger delay time 
+ 

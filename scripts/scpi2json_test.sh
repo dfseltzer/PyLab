@@ -33,21 +33,21 @@ run_test_2() {
     echo "==================================================="
     echo " Test 2: Non-interactive run with explicit pages"
     echo "==================================================="
-    python3 "$PYTHON_SCRIPT" "$PDF_FILE" -p "26-74" -o output_commands.json --no-review
+    python3 "$PYTHON_SCRIPT" "$PDF_FILE" -p "26-67" -o output_commands.json --no-review
 }
 
 run_test_3() {
     echo "==================================================="
     echo " Test 3: Using a smaller chunk size to force more LLM requests"
     echo "==================================================="
-    python3 "$PYTHON_SCRIPT" "$PDF_FILE" -p "26-74" --max-chars-per-chunk 1000
+    python3 "$PYTHON_SCRIPT" "$PDF_FILE" -p "26-67" --max-chars-per-chunk 1000
 }
 
 run_test_4() {
     echo "==================================================="
     echo " Test 4: Full run with review disabled (batch mode)"
     echo "==================================================="
-    python3 "$PYTHON_SCRIPT" "$PDF_FILE" -p "26-74" --no-review -o batch_commands.json
+    python3 "$PYTHON_SCRIPT" "$PDF_FILE" -p "26-67" --no-review -o batch_commands.json
 }
 
 # --- Test selection logic ---

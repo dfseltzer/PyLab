@@ -15,15 +15,45 @@ You need to:
 
 import argparse
 import json
+import os
+import pprint
 from pathlib import Path
 from typing import Dict, List, Any, Tuple
+
+ailib = None
+llm_client = None
+
+# Needed to get the json schema for importing data..
+from pylab.utilities import load_data_file
 
 try:
     import fitz #PyMuPDF
 except ImportError:
     raise ImportError("Please install PyMuPDF: pip install pymupdf")
 
-# examples...# ./scpi2json.py ./ProgrammingManual_BK8616.pdf -p "26-67" --debug-text
+# examples...
+# python ./scpi2json.py ./ProgrammingManual_BK8616.pdf -p "28-67" --debug-text
+# python ./scpi2json.py ./ProgrammingManual_BK8616.pdf -p "28-67" --max-chars-per-chunk 2000 --start-line 20 --debug-start
+# python ./scpi2json.py ./ProgrammingManual_BK8616.pdf -p "28-67" --debug-text --max-chars-per-chunk 2000
+
+# ------------- Environment variable utilities -------------
+
+
+def get_openai_api_key() -> Tuple[str | None, str | None]:
+    """
+    Check for OPENAI_API_KEY environment variable.
+
+    Works on both Windows and Linux environments.
+
+    Returns:
+        Tuple of (LLM to use, Key for that LLM)
+    """
+    openai_api_key = os.environ.get("OPENAI_API_KEY")
+    if openai_api_key is not None:
+        return "OpenAI", openai_api_key
+    else:
+        return None, None
+
 
 # ------------- Utility: page range parsing -------------
 
@@ -32,7 +62,7 @@ def parse_page_ranges(ranges_str: str) -> List[int]:
     """
     "11-35,73-80,90" -> [11,12,...,35,73,...,80,90]
     """
-    print(f"> parse_page_ranges(ranges_str: {ranges_str})")
+    print(f">call parse_page_ranges(ranges_str: {ranges_str})")
     pages: set[int] = set()
     for part in ranges_str.split(","):
         part = part.strip()
@@ -57,9 +87,10 @@ def extract_text_for_pages(pdf_path: Path, pages: List[int]) -> Dict[int, str]:
     pages are 1-based page numbers from the user's perspective.
     Returns {page_number: text}
     """
-    print(f"> extract_text_for_pages(\n"+
-          f">    pdf_path: {pdf_path}\n"+
-          f">    page: {pages if len(pages) < 5 else f"[{pages[0]} ... {pages[-1]}]"}\n"+
+    print(f">call extract_text_for_pages\n"+
+          f"(\n"+
+          f">\tpdf_path: {pdf_path}\n"+
+          f">\tpage: {pages if len(pages) < 5 else f"[{pages[0]} ... {pages[-1]}]"}\n"+
           f">)")
     page_text: Dict[int, str] = {}
     with fitz.open(pdf_path) as pdf:
@@ -84,7 +115,11 @@ def make_chunks(page_text: Dict[int, str], max_chars: int = 4000) -> List[Dict[s
         "text": str,
       }
     """
-    print(f"> make_chunks(page_text: Dict[int, str], max_chars: {max_chars})")
+    print(f">call make_chunks\n"+
+          ">(\n"+
+          ">\tpage_text: Dict[int, str],\n"+
+          ">\tmax_chars: {max_chars}\n"+
+          ">)")
     chunks: List[Dict[str, Any]] = []
     page_entries: List[Tuple[int, str]] = []
     current_len = 0
@@ -123,7 +158,9 @@ def make_chunks(page_text: Dict[int, str], max_chars: int = 4000) -> List[Dict[s
 
     return chunks
 
-def call_llm_extract_commands(chunk_text: str, pages: List[int]) -> List[Dict[str, Any]]:
+def call_llm_extract_commands_openai(chunk_text: str,
+                                     pages: List[int],
+                                     schema: dict) -> List[Dict[str, Any]]:
     """
     Takes a chunk of text and returns a list of candidate SCPI commands.
 
@@ -133,39 +170,70 @@ def call_llm_extract_commands(chunk_text: str, pages: List[int]) -> List[Dict[st
     Commands are extracted by prompting an LLM with instructions to identify SCPI commands,
     their descriptions, and the source pages they were found on.
 
-    The returned list should contain dicts like:
-    
-        [
-            {
-                "command": "[:SENSe]:VOLTage[:DC]:RANGE",
-                "description": "Sets the DC voltage measurement range.",
-                "source_pages": [11, 12],
-                "text": "full command text"
-            },
-            ...
-        ]
-
-
-    Note: this function does not parse commands for formatting, arguments, or other infomation.
-    It simply extracts blocks of text that appear to be SCPI commands along with their descriptions, 
-    while removing any non-command related text.
+    An API key to use must also be provided.
     """
-    # TODO: implement this function per the associated docstring.  Use openAI as the framework.
-    # You can use the openai python package or any other method to call your LLM of choice.
-    return []
+    response = llm_client.responses.create( #type: ignore
+        model="gpt-4.1-mini",      # or gpt-4o, gpt-4o-mini, etc.
+        input=[
+            {
+                "role": "system",
+                "content": (
+                    "You extract SCPI commands from datasheet text. "
+                    "Output ONLY valid JSON following the provided schema. "
+                    "If a command is incomplete or truncated, DO NOT include it. "
+                    "If no complete commands are present, return: {\"commands\": []}"
+                )
+            },
+            {
+                "role": "user",
+                "content": chunk_text
+            }
+        ],
+        temperature=0,
+        text={
+            "format": {
+                "type": "json_schema",
+                "name": "scpi_extract",
+                "schema": schema,
+                "strict": True
+            }
+        }
+    )
 
-def extract_commands_from_chunks(chunks: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
+    # The Responses API returns the JSON as text; load it into Python dict.
+    result = json.loads(response.output_text)
+    # Schema wraps commands in {"commands": [...]} for OpenAI structured outputs
+    return result.get("commands", [])
+
+def extract_commands_from_chunks(chunks: List[Dict[str, Any]],
+                                 ai_framework: str) -> List[Dict[str, Any]]:
     """
     Loop over chunks, call the LLM, and collect candidate commands.
     """
     print(f"> extract_commands_from_chunks(chunks: List[Dict[str, Any]])")
     all_candidates: List[Dict[str, Any]] = []
 
-    for chunk in chunks:
+    if ai_framework == "OpenAI":
+        call_llm_extract_commands = call_llm_extract_commands_openai
+        print(f"Extracting commands using LLM framework: {ai_framework}")
+    else:
+        raise SystemExit(f"No 'call_llm_extract_commands_?' function found for framework {ai_framework} - needs to be added!")
+
+    scpi_schema = load_data_file("./schemas/SCPI_Command.json")
+
+    for idx, chunk in enumerate(chunks):
         text = chunk["text"]
         pages = chunk["pages"]
 
-        commands = call_llm_extract_commands(text, pages)
+        try:
+            commands = call_llm_extract_commands(text, pages, scpi_schema)
+        except Exception as e:
+            raise SystemExit(f"Failed to extract commands on chunk {idx+1}. Failure was:\n\t{str(e)}")
+
+        for k in commands:
+            print(f"{k["name"]}: {k["confidence"]} confidence, partial={k["incomplete"]}, notes: {k["extraction_notes"]}")
+        pprint.pp(commands)
+        raise SystemExit("extracted one")
 
         for c in commands:
             # make sure required keys exist
@@ -384,13 +452,17 @@ def run_cli(argv: List[str] | None = None) -> None:
         action="store_true",
         help="Dump extracted text to '<out>.txt' and stop after writing.",
     )
-
     parser.add_argument(
-        "-k",
-        "--key",
-        type=str,
-        default="",
-        help="ChatGPT API Key",
+        "--debug-start",
+        action="store_true",
+        help="Stop after writing extracting text - use to fine tune pages and start line arguments.",
+    )
+    parser.add_argument(
+        "--start-line",
+        type=int,
+        default=1,
+        help="Line number on the first selected page to start parsing at (1-based). "
+        "Lines before this are discarded from the first page only.",
     )
 
     args = parser.parse_args(argv)
@@ -400,10 +472,11 @@ def run_cli(argv: List[str] | None = None) -> None:
     pages_str: str = args.pages
     no_review: bool = args.no_review
     max_chars: int = args.max_chars_per_chunk
+    start_line: int = args.start_line
 
     if not pdf_path.exists():
         raise SystemExit(f"PDF not found: {pdf_path}")
-    print(f"PDF: {pdf_path}")
+    print(f"Extracting from PDF: {pdf_path}")
 
     # If no pages specified, select on command line.
     if not pages_str:
@@ -422,27 +495,61 @@ def run_cli(argv: List[str] | None = None) -> None:
     page_text = extract_text_for_pages(pdf_path, page_list)
     if not page_text:
         raise SystemExit("No text extracted from the specified pages.")
+
+    # Apply start-line offset to the first page if specified
+    if start_line > 1 and page_list:
+        first_page = min(page_text.keys())
+        if first_page in page_text:
+            lines = page_text[first_page].splitlines(keepends=True)
+            print(f"Start page {first_page} has {len(lines)} lines. Starting at line {start_line}")
+            if start_line > len(lines):
+                print(f"Start line is past end of page... skipping this page.")
+                page_text[first_page] = ""
+            else:
+                # start_line is 1-based, so slice from index (start_line - 1)
+                page_text[first_page] = "".join(lines[start_line - 1:])
+                print(f"Skipped first {start_line - 1} lines on page {first_page}.")
+                print(f"First line is now...")
+                print(f">>> {page_text[first_page].splitlines()[0].strip()}")
     if out_path.suffix:
         debug_text_path = out_path.with_suffix(".txt")
     else:
         debug_text_path = out_path.with_name(out_path.name + ".txt")
 
+    if args.debug_start:
+        raise SystemExit("Debug start flag was set - exiting after selecting start.")
+
     # Sort pages by page number
     sorted_pages = sorted(page_text.items())
     debug_chunks = [f"---- PAGE {page} ----\n{text}" for page, text in sorted_pages]
     debug_text_path.write_text("\n\n".join(debug_chunks))
-    print(f"Wrote extracted text to {debug_text_path}")
-    print(f"Extracted text from {len(page_text)} pages.")
+    print(f"Wrote extracted text to {debug_text_path} from {len(page_text)} pages.")
 
     if args.debug_text:
-        SystemExit("Debug text flag was set - exiting after writing extracted text.")
+        raise SystemExit("Debug text flag was set - exiting after writing extracted text.")
 
     # Create chunks for better LLM submission... 
     chunks = make_chunks(page_text, max_chars=max_chars)
     print(f"Created {len(chunks)} chunk(s) for LLM processing.")
 
     # Do actual extration
-    candidates = extract_commands_from_chunks(chunks)
+    ai_framework, ai_api_key = get_openai_api_key()
+    if ai_framework == "OpenAI":
+        global ailib # yucky
+        global llm_client
+        try:
+            from openai import OpenAI as ailib
+        except (ImportError) as e:
+            raise SystemExit(f"Unable to import openai (API key was for OpenAI) - check this is installed!")
+        llm_client = ailib(api_key=os.getenv("OPENAI_API_KEY"))
+    else:
+        raise SystemExit(f"No LLM API keys - please set one of the following environment variables:\n"
+              f"\tOPENAI_API_KEY: When using OpenAI")
+    
+    # Try and import selected AI framework and set to global so other methods can use...
+    
+
+    candidates = extract_commands_from_chunks(chunks, ai_framework) #type: ignore
     print(f"LLM returned {len(candidates)} candidate command entries.")
 
     return

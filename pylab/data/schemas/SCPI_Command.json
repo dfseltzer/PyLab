@@ -1,0 +1,282 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "SCPI Command Extraction Response",
+  "description": "Response schema for extracting SCPI commands from test equipment programming manuals. This is the wrapper for OpenAI structured outputs.",
+  "type": "object",
+  "required": ["commands"],
+  "additionalProperties": false,
+  "properties": {
+    "commands": {
+      "type": "array",
+      "description": "Array of extracted SCPI commands. May be empty if no commands found in the text.",
+      "items": {
+        "type": "object",
+        "description": "A single SCPI command. SCPI commands typically have a SET form (to configure the instrument) and/or a QUERY form (ending in '?' to read values back).",
+        "required": [
+          "name",
+          "short_name",
+          "page_reference",
+          "set",
+          "query",
+          "response",
+          "help",
+          "confidence",
+          "incomplete",
+          "extraction_notes"
+        ],
+        "additionalProperties": false,
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "The full SCPI command mnemonic including colons (e.g., ':SOURce:VOLTage', ':OUTPut', '*RST'). Use the long-form (not abbreviated) version when both are documented. Include the leading colon for subsystem commands, no colon for IEEE 488.2 common commands (starting with *). Use empty string if command name cannot be determined."
+          },
+          "short_name": {
+            "type": "string",
+            "description": "The abbreviated form of the command mnemonic (e.g., ':SOUR:VOLT' for ':SOURce:VOLTage'). Only the uppercase letters form the short version. Use empty string if not available or identical to 'name'."
+          },
+          "page_reference": {
+            "anyOf": [
+              { "type": "string" },
+              { "type": "integer" },
+              { "type": "null" }
+            ],
+            "description": "Page number or section reference in the source manual where this command is documented. Can be a number (e.g., 42), string (e.g., '3-15'), or null if unknown."
+          },
+          "set": {
+            "description": "Arguments for the SET form of the command (e.g., ':VOLT 5.0'). Use null if the command has no SET form. Use empty array [] if SET takes no arguments.",
+            "anyOf": [
+              {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "description": "A single argument for the command.",
+                  "required": ["type", "required", "default", "range", "values", "variadic"],
+                  "additionalProperties": false,
+                  "properties": {
+                    "type": {
+                      "type": "string",
+                      "enum": ["bool", "int", "float", "str", "unknown"],
+                      "description": "Data type: 'bool' for ON/OFF/0/1, 'int' for integers, 'float' for decimal numbers, 'str' for strings or enumerated keywords, 'unknown' if type cannot be determined."
+                    },
+                    "required": {
+                      "type": "boolean",
+                      "description": "Whether this argument is mandatory."
+                    },
+                    "default": {
+                      "anyOf": [
+                        { "type": "string" },
+                        { "type": "number" },
+                        { "type": "boolean" },
+                        { "type": "null" }
+                      ],
+                      "description": "Default value when argument is omitted. Use null if no default."
+                    },
+                    "range": {
+                      "anyOf": [
+                        {
+                          "type": "array",
+                          "description": "Valid numeric range as [min, max]. Use null for unbounded values.",
+                          "items": {
+                            "anyOf": [
+                              { "type": "number" },
+                              { "type": "null" }
+                            ]
+                          }
+                        },
+                        { "type": "null" }
+                      ],
+                      "description": "Numeric range [min, max] or null if not applicable."
+                    },
+                    "values": {
+                      "anyOf": [
+                        {
+                          "type": "array",
+                          "description": "List of allowed discrete values or keywords.",
+                          "items": {
+                            "anyOf": [
+                              { "type": "string" },
+                              { "type": "number" },
+                              { "type": "boolean" }
+                            ]
+                          }
+                        },
+                        { "type": "null" }
+                      ],
+                      "description": "Allowed discrete values (e.g., ['MIN', 'MAX', 'DEF']) or null if not applicable."
+                    },
+                    "variadic": {
+                      "type": "boolean",
+                      "description": "If true, this argument can be repeated multiple times."
+                    }
+                  }
+                }
+              },
+              { "type": "null" }
+            ]
+          },
+          "query": {
+            "description": "Arguments for the QUERY form of the command (e.g., ':VOLT?'). Use null if the command has no QUERY form. Most queries take no arguments (empty array).",
+            "anyOf": [
+              {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "description": "A single argument for the query.",
+                  "required": ["type", "required", "default", "range", "values", "variadic"],
+                  "additionalProperties": false,
+                  "properties": {
+                    "type": {
+                      "type": "string",
+                      "enum": ["bool", "int", "float", "str", "unknown"],
+                      "description": "Data type: 'bool' for ON/OFF/0/1, 'int' for integers, 'float' for decimal numbers, 'str' for strings or enumerated keywords, 'unknown' if type cannot be determined."
+                    },
+                    "required": {
+                      "type": "boolean",
+                      "description": "Whether this argument is mandatory."
+                    },
+                    "default": {
+                      "anyOf": [
+                        { "type": "string" },
+                        { "type": "number" },
+                        { "type": "boolean" },
+                        { "type": "null" }
+                      ],
+                      "description": "Default value when argument is omitted. Use null if no default."
+                    },
+                    "range": {
+                      "anyOf": [
+                        {
+                          "type": "array",
+                          "description": "Valid numeric range as [min, max]. Use null for unbounded values.",
+                          "items": {
+                            "anyOf": [
+                              { "type": "number" },
+                              { "type": "null" }
+                            ]
+                          }
+                        },
+                        { "type": "null" }
+                      ],
+                      "description": "Numeric range [min, max] or null if not applicable."
+                    },
+                    "values": {
+                      "anyOf": [
+                        {
+                          "type": "array",
+                          "description": "List of allowed discrete values or keywords.",
+                          "items": {
+                            "anyOf": [
+                              { "type": "string" },
+                              { "type": "number" },
+                              { "type": "boolean" }
+                            ]
+                          }
+                        },
+                        { "type": "null" }
+                      ],
+                      "description": "Allowed discrete values (e.g., ['MIN', 'MAX', 'DEF']) or null if not applicable."
+                    },
+                    "variadic": {
+                      "type": "boolean",
+                      "description": "If true, this argument can be repeated multiple times."
+                    }
+                  }
+                }
+              },
+              { "type": "null" }
+            ]
+          },
+          "response": {
+            "description": "Structure of the response returned by the QUERY form. Use null if there is no QUERY form or response format is unknown.",
+            "anyOf": [
+              {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "description": "A single value in the response.",
+                  "required": ["type", "required", "default", "range", "values", "variadic"],
+                  "additionalProperties": false,
+                  "properties": {
+                    "type": {
+                      "type": "string",
+                      "enum": ["bool", "int", "float", "str", "unknown"],
+                      "description": "Data type: 'bool' for ON/OFF/0/1, 'int' for integers, 'float' for decimal numbers, 'str' for strings or enumerated keywords, 'unknown' if type cannot be determined."
+                    },
+                    "required": {
+                      "type": "boolean",
+                      "description": "Whether this value is always present in response."
+                    },
+                    "default": {
+                      "anyOf": [
+                        { "type": "string" },
+                        { "type": "number" },
+                        { "type": "boolean" },
+                        { "type": "null" }
+                      ],
+                      "description": "Default value. Use null if not applicable for responses."
+                    },
+                    "range": {
+                      "anyOf": [
+                        {
+                          "type": "array",
+                          "description": "Valid numeric range as [min, max]. Use null for unbounded values.",
+                          "items": {
+                            "anyOf": [
+                              { "type": "number" },
+                              { "type": "null" }
+                            ]
+                          }
+                        },
+                        { "type": "null" }
+                      ],
+                      "description": "Numeric range [min, max] or null if not applicable."
+                    },
+                    "values": {
+                      "anyOf": [
+                        {
+                          "type": "array",
+                          "description": "List of possible return values.",
+                          "items": {
+                            "anyOf": [
+                              { "type": "string" },
+                              { "type": "number" },
+                              { "type": "boolean" }
+                            ]
+                          }
+                        },
+                        { "type": "null" }
+                      ],
+                      "description": "Possible discrete return values or null if not applicable."
+                    },
+                    "variadic": {
+                      "type": "boolean",
+                      "description": "If true, multiple values of this type may be returned."
+                    }
+                  }
+                }
+              },
+              { "type": "null" }
+            ]
+          },
+          "help": {
+            "type": "string",
+            "description": "Brief description of what the command does. Use empty string if no description available."
+          },
+          "confidence": {
+            "type": "string",
+            "enum": ["high", "medium", "low"],
+            "description": "Confidence level: 'high' = clearly documented, 'medium' = some inference needed, 'low' = significant guesswork."
+          },
+          "incomplete": {
+            "type": "boolean",
+            "description": "Set to true if the command definition is cut off or missing critical information."
+          },
+          "extraction_notes": {
+            "type": "string",
+            "description": "Notes about extraction issues or assumptions. Use empty string if none."
+          }
+        }
+      }
+    }
+  }
+}
