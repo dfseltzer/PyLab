@@ -156,56 +156,6 @@ class Load(Device):
     def command_map(self) -> dict:
         pass
 
-    @property
-    @abstractmethod
-    def enabled(self) -> bool:
-        pass
-
-    @enabled.setter
-    @abstractmethod
-    def enabled(self, value: bool):
-        pass
-
-    @property
-    @abstractmethod
-    def mode(self) -> str:
-        pass
-
-    @mode.setter
-    @abstractmethod
-    def mode(self, value: str):
-        pass
-
-    @property
-    @abstractmethod
-    def voltage(self) -> float:
-        pass
-
-    @voltage.setter
-    @abstractmethod
-    def voltage(self, value: float):
-        pass
-
-    @property
-    @abstractmethod
-    def current(self) -> float:
-        pass
-
-    @current.setter
-    @abstractmethod
-    def current(self, value: float):
-        pass
-
-    @property
-    @abstractmethod
-    def power(self) -> float:
-        pass
-
-    @power.setter
-    @abstractmethod
-    def power(self, value: float):
-        pass
-
 class Source(Device):
     @property
     @abstractmethod
@@ -217,32 +167,3 @@ class Source(Device):
     def command_map(self) -> dict:
         pass
 
-    @property
-    @abstractmethod
-    def enabled(self) -> bool:
-        pass
-
-    @enabled.setter
-    @abstractmethod
-    def enabled(self, value: bool):
-        pass
-
-    @property
-    @abstractmethod
-    def voltage(self) -> float:
-        pass
-
-    @voltage.setter
-    @abstractmethod
-    def voltage(self, value: float):
-        pass
-
-    @property
-    @abstractmethod
-    def current(self) -> float:
-        pass
-
-    @current.setter
-    @abstractmethod
-    def current(self, value: float):
-        pass
