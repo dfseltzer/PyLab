@@ -123,6 +123,37 @@
           "type": "str"
         }
       ]
+    },
+    "CURR": {
+      "set": [
+        {
+          "type": "float",
+          "required": true
+        }
+      ],
+      "query": [],
+      "help": "Set or read output current level",
+      "response": [
+        {
+          "type": "float"
+        }
+      ]
+    },
+    "VOLT": {
+      "set": [
+        {
+          "type": "float",
+          "required": true
+        }
+      ],
+      "query": [],
+      "help": "Set or read output voltage level",
+      "response": [
+        {
+          "type": "float"
+        }
+      ]
     }
   }
+  
 }
