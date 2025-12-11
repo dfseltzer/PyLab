@@ -146,15 +146,15 @@ class Device(ABC):
             logger.warning(f"{self.name} failed to close connection in __del__")
 
 class Load(Device):
-    # @property
-    # @abstractmethod
-    # def command_file(self) -> str:
-    #     pass
+    @property
+    @abstractmethod
+    def command_file(self) -> str:
+        pass
 
-    # @property
-    # @abstractmethod
-    # def command_map(self) -> dict:
-    #     pass
+    @property
+    @abstractmethod
+    def command_map(self) -> dict:
+        pass
 
     @property
     @abstractmethod
@@ -207,6 +207,16 @@ class Load(Device):
         pass
 
 class Source(Device):
+    @property
+    @abstractmethod
+    def command_file(self) -> str:
+        pass
+
+    @property
+    @abstractmethod
+    def command_map(self) -> dict:
+        pass
+
     @property
     @abstractmethod
     def enabled(self) -> bool:
