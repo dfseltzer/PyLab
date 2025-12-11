@@ -71,5 +71,10 @@ Jupyter gives a nice interface for scripting stuff... but it is not needed.
 python -m pip install jupyterlab
 ```
 
+Jupyter can then be started with 
+```
+jupyter lab
+```
+
 ### Linux/WSL
 Excel interface is not available but it works.  Will update docs later - ask for help if you want this type of install.  Currently most development is done on a linux install using WSL with a Debian image.

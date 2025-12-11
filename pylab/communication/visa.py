@@ -40,7 +40,10 @@ class ResourceManager(object):
             return
         # only do onece, so set flag.
         self._initialized = True
-        self.manager = pyvisa.ResourceManager(RESOURCEMANAGER)
+        try:
+            self.manager = pyvisa.ResourceManager(RESOURCEMANAGER)
+        except ValueError as e:
+            logger.error(f"Backend not installed? Try installing pyvisa_py.")
         self.intruments = dict() # resource name to object map
         
     def reset(self, really_do_this=False):

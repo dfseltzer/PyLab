@@ -1,10 +1,6 @@
 [build-system]
 requires = [
-    "setuptools >= 61.0",
-    "pyvisa >= 1.15",
-    "pyvisa_py >= 0.8.1",
-    "psutil >= 7.1.3",
-    "zeroconf >= 0.148.0"
+    "setuptools >= 61.0"
 ]
 build-backend = "setuptools.build_meta"
 
@@ -15,7 +11,12 @@ license-files = ["LICENSE"]
 keywords = ["electrical", "EE", "math", "symbolic", "engineering", "power"]
 dynamic = ["version", "readme"]
 requires-python = ">= 3.13"
-dependencies = []
+dependencies = [
+    "pyvisa >= 1.15",
+    "pyvisa_py >= 0.8.1",
+    "psutil >= 7.1.3",
+    "zeroconf >= 0.148.0"
+]
 
 [project.scripts]
 pylab = "pylab.cli:main"
