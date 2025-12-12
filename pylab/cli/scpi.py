@@ -12,10 +12,10 @@ from pylab.utilities import list_data_files, load_data_file
 
 GENERIC_ERROR_RETURN = 1
 
-SCPI_TYPES = {"bool": "True/False, 1/0, and ON/OFF.", 
-              "int": "Integer or convertable to integer.",
-              "float": "Floating point numeric.", 
-              "str": "Strings."}
+SCPI_TYPES = (("bool", "True/False, 1/0, and ON/OFF."), 
+              ("int", "Integer or convertable to integer."),
+              ("float", "Floating point numeric."), 
+              ("str", "Strings."))
 
 # handlers
 def handle_add(args):
@@ -60,16 +60,26 @@ def load_file(filename,indent=0):
     return filedata
 
 # command parts helpers
-def get_set_format():
+def get_set_format() -> None | list:
     hasset = get_responce_yesno("Does this command support sets [Y/n]?",'y')
     if not hasset:
         print("Set format done.")
         return None
     
+    argtypechoice_prompt = "\n".join(
+        f"...... [{idx+1:2d}] {key} - {val}" for idx, (key,val) in enumerate(SCPI_TYPES)
+    ) + f"\n...... [{len(SCPI_TYPES)+1:2d}] Abort and Exit"
     argset =  []
     argsetcount = get_responce_posint("How many set arguments [0]?",0)
     for argidx in range(argsetcount):
         print(f"Adding argument {argidx+1}/{argsetcount}:")
+        argset.append(dict(
+            requried= get_responce_yesno("... Required [y/N]?",'n'),
+        )) # the rest need more input... cant inline yet...
+        print(f"... Argument Type\n"+argtypechoice_prompt)
+        argtypeidx = get_responce_range("...... Selection:", 1, len(SCPI_TYPES))
+        argset[-1]["type"] = SCPI_TYPES[argtypeidx-1][0]
+    return argset
 
 # responce getter helpers
 def get_responce_range(prompt: str, min: int, max: int, exit_val: int | None =None) -> int:
@@ -83,13 +93,13 @@ def get_responce_range(prompt: str, min: int, max: int, exit_val: int | None =No
         except ValueError as e:
             this_resp = None
         else:
-            if (this_resp > exit_val) or this_resp < 0:
+            if this_resp == exit_val:
+                pass
+            elif (this_resp > max) or (this_resp < min):
+                print(f"Invalid Selection: Out of range ({min}-{max}), got {this_resp}")
                 this_resp = None
         finally:
-            if valid_resp := (this_resp is not None):
-                pass
-            else:
-                print(f"Invalid Selection") 
+            valid_resp = (this_resp is not None)
     if (this_resp == exit_val) or this_resp is None:
         raise SystemExit()
     return this_resp
