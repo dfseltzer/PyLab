@@ -19,7 +19,9 @@ dependencies = [
 ]
 
 [project.scripts]
-pylab = "pylab.cli:main"
+pylab-inst = "pylab.cli.inst:main"
+pylab-scpi = "pylab.cli.scpi:main"
+
 
 [tool.setuptools]
 packages = ["pylab"]

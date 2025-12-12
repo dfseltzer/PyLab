@@ -1,5 +1,5 @@
 HELP_TEXT = """
-Simple command line interface for PyLab.
+Simple command line interface for PyLab instument interaction.
 
 Universal Flags
 -t [--type]:        Connection type.  Defaults to VISA
@@ -26,7 +26,7 @@ def handle_list(args):
     # list is different... so do for each...
     if conn_type == "VISA":
         try:
-            from .communication.visa import ResourceManager
+            from ..communication.visa import ResourceManager
         except (ImportError, ModuleNotFoundError) as e:
             print(f"Unable to import required modules... are dependancies installed? Failed with {e}")
             return GENERIC_ERROR_RETURN
@@ -47,7 +47,7 @@ def handle_identify(args):
     """
     Send a *IDN? query to the selected instrument
     """
-    from .communication import getConnection
+    from ..communication import getConnection
 
     print(f"Identifying {args.address}")
     conn_type = args.conn_type
@@ -82,7 +82,7 @@ def handle_write(args):
     Send the specified command to the instrument, with the desired arguments.  Commands specified in this 
     way must exist in the instruments command_map
     """
-    from .communication import getConnection
+    from ..communication import getConnection
 
     print(f"Writing to {args.address}: {args.command}")
     conn_type = args.conn_type
@@ -116,7 +116,7 @@ def handle_read(args):
     Send the specified command to the instrument, with the desired arguments.  Commands specified in this 
     way must exist in the instruments command_map
     """
-    from .communication import getConnection
+    from ..communication import getConnection
 
     print(f"Writing to {args.address}: {args.command}")
     conn_type = args.conn_type
@@ -152,8 +152,8 @@ def handle_read(args):
         
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
-        prog="pylab",
-        description="Simple command line interface for PyLab.",
+        prog="pylab-inst",
+        description="Simple command line interface for PyLab instrument control.",
         epilog=HELP_TEXT,
         formatter_class=argparse.RawDescriptionHelpFormatter,
     )
@@ -231,7 +231,7 @@ def main(argv=None) -> int:
     parser = build_parser()
     args = parser.parse_args(argv)
 
-    from .communication import ConnectionTypes
+    from ..communication import ConnectionTypes
 
     if not ConnectionTypes.is_known(args.conn_type):
         print(f"Unknown connection type specified ({args.conn_type}) - exiting.") 
