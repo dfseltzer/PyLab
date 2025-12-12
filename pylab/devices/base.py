@@ -60,6 +60,10 @@ class Device(ABC):
                 raise AttributeError(f"{self.name}: Command '{name}' is read-only or not implemented.")
             self.write(write_key, value)
         else: # not in map... just try normal set
+            try: # only allow set if it already exists, otherwise prevent.  Avoids missnaming built ins and having ussues from that.
+                _ = object.__getattribute__(self, name)
+            except AttributeError as e:
+                raise AttributeError(f"Cannot add new property {name}") from e
             object.__setattr__(self, name, value)
 
     def __getattribute__(self, name):
