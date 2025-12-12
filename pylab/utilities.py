@@ -35,6 +35,16 @@ def load_data_file(fname):
 
     return fdat
 
+def list_data_files(glob="*"):
+    """
+    List data files, matching a given glob if one is provided.
+
+    :param glob: Description
+    """
+    base_path = pathlib.Path(DATA_ABS_PATH)  # type: ignore
+    return list(fp.name for fp in base_path.glob(glob))
+
+
 class CustomFormatter(logging.Formatter):
     """
     Thanks https://stackoverflow.com/users/9150146/sergey-pleshakov

@@ -10,7 +10,7 @@
     ]
   },
   "commands": {
-    "MEAS:VOLT": {
+    "MEAS:VOLT2": {
       "set": null,
       "query": [],
       "help": "Query the average DC voltage at the load input",
