@@ -1,0 +1,6 @@
+[ ] Verify SCPI_command.json response definition as changed for array
+instead of dict is valid schema
+
+[ ] Update SCPI_commandset.json to match command schema
+
+[ ] Validate existing command sets against update schema

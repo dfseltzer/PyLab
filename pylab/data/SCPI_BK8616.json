@@ -1,159 +1,147 @@
 {
-  "info": {
-    "device": "BK Precision 8616 Electronic Load",
-    "description": "SCPI command metadata for the BK Precision 8616. Ranges and options reflect this model's specifications where available.",
-    "notes": [
-      "Arguments and responses lists are ordered.",
-      "Arguments and responses of type str may have a values list for accepted values.",
-      "Arguments and responses of type int or float may have a range parameter for min and max.",
-      "If a command supports variadic arguments, the last argument will have 'variadic': true."
-    ]
-  },
-  "commands": {
-    "MEAS:VOLT2": {
-      "set": null,
-      "query": [],
-      "help": "Query the average DC voltage at the load input",
-      "response": [
-        {
-          "type": "float"
+    "commands": {
+        "CURR": {
+            "help": "Set or read output current level",
+            "query": [],
+            "response": [
+                "float"
+            ],
+            "set": [
+                {
+                    "required": true,
+                    "type": "float"
+                }
+            ]
+        },
+        "FUNC": {
+            "help": "Select input mode: CURR, VOLT, POW, RES, or IMP",
+            "query": [],
+            "response": [
+                "str"
+            ],
+            "set": [
+                {
+                    "required": true,
+                    "type": "str",
+                    "values": [
+                        "CURR",
+                        "VOLT",
+                        "POW",
+                        "RES"
+                    ]
+                }
+            ]
+        },
+        "INP": {
+            "help": "Set input on/off state (0/OFF or 1/ON)",
+            "query": [],
+            "response": [
+                "float"
+            ],
+            "set": [
+                {
+                    "default": null,
+                    "required": true,
+                    "type": "bool"
+                }
+            ]
+        },
+        "INP:SHOR": {
+            "help": "Set short circuit function state (0/OFF or 1/ON)",
+            "query": null,
+            "response": null,
+            "set": [
+                {
+                    "default": null,
+                    "required": true,
+                    "type": "bool"
+                }
+            ]
+        },
+        "INP:SHOR:STAT": {
+            "help": "Set short circuit function state (0/OFF or 1/ON)",
+            "query": [
+                {
+                    "required": true,
+                    "type": "bool"
+                }
+            ],
+            "response": [
+                "bool"
+            ],
+            "set": null
+        },
+        "MEAS:CURR": {
+            "help": "Query the average DC current at the load input",
+            "query": [],
+            "response": [
+                "float"
+            ],
+            "set": null
+        },
+        "MEAS:POW": {
+            "help": "Query the average power at the load input",
+            "query": [],
+            "response": [
+                "float"
+            ],
+            "set": null
+        },
+        "MEAS:VOLT": {
+            "query": [],
+            "response": [
+                "float"
+            ],
+            "set": null
+        },
+        "MEAS:VOLT2": {
+            "help": "Query the average DC voltage at the load input",
+            "query": [],
+            "response": [
+                "float"
+            ],
+            "set": null
+        },
+        "MODE": {
+            "help": "SThis command determines whether the input regulation mode is controlled by values in a list or by the FUNCtion command setting.",
+            "query": [],
+            "response": [
+                "str"
+            ],
+            "set": [
+                {
+                    "default": null,
+                    "required": true,
+                    "type": "str",
+                    "values": [
+                        "FIX",
+                        "LIST"
+                    ]
+                }
+            ]
+        },
+        "VOLT": {
+            "help": "Set or read output voltage level",
+            "query": [],
+            "response": [
+                "float"
+            ],
+            "set": [
+                {
+                    "required": true,
+                    "type": "float"
+                }
+            ]
         }
-      ]
     },
-    "MEAS:CURR": {
-      "set": null,
-      "query": [],
-      "help": "Query the average DC current at the load input",
-      "response": [
-        {
-          "type": "float"
-        }
-      ]
-    },
-    "MEAS:POW": {
-      "set": null,
-      "query": [],
-      "help": "Query the average power at the load input",
-      "response": [
-        {
-          "type": "float"
-        }
-      ]
-    },
-    "INP": {
-      "set": [
-        {
-          "type": "bool",
-          "required": true,
-          "default": null
-        }
-      ],
-      "query": [],
-      "help": "Set input on/off state (0/OFF or 1/ON)",
-      "response": [
-        {
-          "type": "bool"
-        }
-      ]
-    },
-    "INP:SHOR": {
-      "set": [
-        {
-          "type": "bool",
-          "required": true,
-          "default": null
-        }
-      ],
-      "query": null,
-      "help": "Set short circuit function state (0/OFF or 1/ON)",
-      "response": null
-    },
-    "INP:SHOR:STAT": {
-      "set": null,
-      "query": [
-        {
-          "type": "bool",
-          "required": true
-        }
-      ],
-      "help": "Set short circuit function state (0/OFF or 1/ON)",
-      "response": [
-        {
-          "type": "bool"
-        }
-      ]
-    },
-    "FUNC": {
-      "set": [
-        {
-          "type": "str",
-          "required": true,
-          "values": [
-            "CURR",
-            "VOLT",
-            "POW",
-            "RES"
-          ]
-        }
-      ],
-      "query": [],
-      "help": "Select input mode: CURR, VOLT, POW, RES, or IMP",
-      "response": [
-        {
-          "type": "str"
-        }
-      ]
-    },
-    "MODE": {
-      "set": [
-        {
-          "type": "str",
-          "required": true,
-          "default": null,
-          "values": [
-            "FIX",
-            "LIST"
-          ]
-        }
-      ],
-      "query": [],
-      "help": "SThis command determines whether the input regulation mode is controlled by values in a list or by the FUNCtion command setting.",
-      "response": [
-        {
-          "type": "str"
-        }
-      ]
-    },
-    "CURR": {
-      "set": [
-        {
-          "type": "float",
-          "required": true
-        }
-      ],
-      "query": [],
-      "help": "Set or read output current level",
-      "response": [
-        {
-          "type": "float"
-        }
-      ]
-    },
-    "VOLT": {
-      "set": [
-        {
-          "type": "float",
-          "required": true
-        }
-      ],
-      "query": [],
-      "help": "Set or read output voltage level",
-      "response": [
-        {
-          "type": "float"
-        }
-      ]
+    "info": {
+        "description": "SCPI command metadata for the BK Precision 8616. Ranges and options reflect this model's specifications where available.",
+        "device": "BK Precision 8616 Electronic Load",
+        "notes": [
+            "Arguments and responses lists are ordered.",
+            "Arguments and responses of type str may have a values list for accepted values.",
+            "Arguments and responses of type int or float may have a range parameter for min and max.",
+            "If a command supports variadic arguments, the last argument will have 'variadic': true."
+        ]
     }
-  }
-  
 }

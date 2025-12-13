@@ -14,7 +14,6 @@ if DATA_ABS_PATH is None:
     fpath, fname = os.path.split(__file__)
     DATA_ABS_PATH = pathlib.Path(fpath, DATA_REL_PATH)
 
-
 def load_data_file(fname):
     """
     Load a data file from the data directory.
@@ -34,6 +33,24 @@ def load_data_file(fname):
         fdat = json.load(fobj)
 
     return fdat
+
+def update_data_file(fname, data):
+    """
+    Update a data file in the data directory.
+
+    :param fname: filename to update. not including suffix or path.
+    :param data: data to write.  For json, this should be a dictionary object.
+    """
+    base_path = pathlib.Path(DATA_ABS_PATH, fname)  # type: ignore
+    candidates = (base_path, pathlib.Path(f"{base_path}.json"))
+
+    full_path = next((path for path in candidates if path.is_file()), None)
+    if full_path is None:
+        raise FileNotFoundError(f"Data file '{fname}' not found in {DATA_ABS_PATH}")
+    
+    with open(full_path, "w") as fobj:
+        json.dump(data, fobj, indent=4, sort_keys=True)
+    
 
 def list_data_files(glob="*"):
     """

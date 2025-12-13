@@ -192,67 +192,8 @@
               {
                 "type": "array",
                 "items": {
-                  "type": "object",
-                  "description": "A single value in the response.",
-                  "required": ["type", "required", "default", "range", "values", "variadic"],
-                  "additionalProperties": false,
-                  "properties": {
-                    "type": {
-                      "type": "string",
-                      "enum": ["bool", "int", "float", "str", "unknown"],
-                      "description": "Data type: 'bool' for ON/OFF/0/1, 'int' for integers, 'float' for decimal numbers, 'str' for strings or enumerated keywords, 'unknown' if type cannot be determined."
-                    },
-                    "required": {
-                      "type": "boolean",
-                      "description": "Whether this value is always present in response."
-                    },
-                    "default": {
-                      "anyOf": [
-                        { "type": "string" },
-                        { "type": "number" },
-                        { "type": "boolean" },
-                        { "type": "null" }
-                      ],
-                      "description": "Default value. Use null if not applicable for responses."
-                    },
-                    "range": {
-                      "anyOf": [
-                        {
-                          "type": "array",
-                          "description": "Valid numeric range as [min, max]. Use null for unbounded values.",
-                          "items": {
-                            "anyOf": [
-                              { "type": "number" },
-                              { "type": "null" }
-                            ]
-                          }
-                        },
-                        { "type": "null" }
-                      ],
-                      "description": "Numeric range [min, max] or null if not applicable."
-                    },
-                    "values": {
-                      "anyOf": [
-                        {
-                          "type": "array",
-                          "description": "List of possible return values.",
-                          "items": {
-                            "anyOf": [
-                              { "type": "string" },
-                              { "type": "number" },
-                              { "type": "boolean" }
-                            ]
-                          }
-                        },
-                        { "type": "null" }
-                      ],
-                      "description": "Possible discrete return values or null if not applicable."
-                    },
-                    "variadic": {
-                      "type": "boolean",
-                      "description": "If true, multiple values of this type may be returned."
-                    }
-                  }
+                  "type": "string",
+                  "enum": ["bool", "int", "float", "str", "unknown"]
                 }
               },
               { "type": "null" }
