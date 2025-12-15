@@ -71,7 +71,7 @@ def handle_add(args):
             resplist.append(SCPI_TYPES[resytypeidx-1][0])
         cmddict["response"] = resplist
     
-    cmddict["help"] = input("Enter command help text/description: s")
+    cmddict["help"] = input("Enter command help text/description: ")
 
     print(f"Command formatting finished:\n{cmdname}=", end="")
     pprint.pprint(cmddict, indent=4)

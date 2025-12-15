@@ -1,75 +1,147 @@
 {
     "commands": {
         "CURR": {
-            "help": "Set or read output current level",
+            "help": "This command sets the current that the load will regulate when operating in constant current mode.",
             "query": [],
             "response": [
                 "float"
             ],
             "set": [
                 {
-                    "required": true,
+                    "range": [
+                        0.0,
+                        60.0
+                    ],
+                    "requried": true,
+                    "type": "float"
+                }
+            ]
+        },
+        "CURR:PROT:DEL": {
+            "help": "This command specifies the time that the input current can exceed the protection level before theinput is turned off.",
+            "query": [],
+            "response": [
+                "int"
+            ],
+            "set": [
+                {
+                    "range": [
+                        0.0,
+                        60.0
+                    ],
+                    "requried": true,
+                    "type": "float"
+                }
+            ]
+        },
+        "CURR:PROT:LEV": {
+            "help": "This command sets the soft current protection level. If the input current exceeds the soft currentprotection level for the time specified by CURR:PROT:DEL, the input is turned off.",
+            "query": [],
+            "response": [
+                "float"
+            ],
+            "set": [
+                {
+                    "range": [
+                        0.0,
+                        60.0
+                    ],
+                    "requried": true,
+                    "type": "float"
+                }
+            ]
+        },
+        "CURR:PROT:STAT": {
+            "help": "This command enables or disables the overcurrent protection feature",
+            "query": [],
+            "response": [
+                "float"
+            ],
+            "set": [
+                {
+                    "requried": true,
+                    "type": "bool"
+                }
+            ]
+        },
+        "CURR:RANG": {
+            "help": "This command sets the current range of the electronic load module. There are two current ranges, highrange (model dependent) and low range (model dependent).When you program a range value, the load automatically selects the range that corresponds to thevalue that you program. If the value falls in a region where ranges overlap, the electronic load selectsthe range with the highest resolution.",
+            "query": [],
+            "response": [
+                "float"
+            ],
+            "set": [
+                {
+                    "range": [
+                        0.0,
+                        60.0
+                    ],
+                    "requried": true,
                     "type": "float"
                 }
             ]
         },
         "FUNC": {
-            "help": "Select input mode: CURR, VOLT, POW, RES, or IMP",
+            "help": "This command selects the input regulation mode of the electronic load.",
             "query": [],
             "response": [
                 "str"
             ],
             "set": [
                 {
-                    "required": true,
+                    "requried": true,
                     "type": "str",
                     "values": [
                         "CURR",
+                        "RES",
                         "VOLT",
-                        "POW",
-                        "RES"
+                        "POW"
+                    ]
+                }
+            ]
+        },
+        "FUNC:MODE": {
+            "help": "This command determines whether the input regulation mode is controlled by values in a list or by theFUNCtion command setting.",
+            "query": [],
+            "response": [
+                "str"
+            ],
+            "set": [
+                {
+                    "requried": true,
+                    "type": "str",
+                    "values": [
+                        "FIX",
+                        "LIST"
                     ]
                 }
             ]
         },
         "INP": {
-            "help": "Set input on/off state (0/OFF or 1/ON)",
+            "help": "Sets instrument input state.",
             "query": [],
             "response": [
-                "float"
+                "bool"
             ],
             "set": [
                 {
-                    "default": null,
-                    "required": true,
+                    "requried": true,
                     "type": "bool"
                 }
             ]
         },
         "INP:SHOR": {
-            "help": "Set short circuit function state (0/OFF or 1/ON)",
-            "query": null,
-            "response": null,
-            "set": [
-                {
-                    "default": null,
-                    "required": true,
-                    "type": "bool"
-                }
-            ]
-        },
-        "INP:SHOR:STAT": {
-            "help": "Set short circuit function state (0/OFF or 1/ON)",
-            "query": [
-                {
-                    "required": true,
-                    "type": "bool"
-                }
-            ],
+            "help": "Sets input short condition",
+            "query": [],
             "response": [
                 "bool"
             ],
-            "set": null
+            "set": [
+                {
+                    "requried": true,
+                    "type": "bool"
+                }
+            ]
         },
         "MEAS:CURR": {
             "help": "Query the average DC current at the load input",
@@ -79,23 +151,7 @@
             ],
             "set": null
         },
-        "MEAS:POW": {
-            "help": "Query the average power at the load input",
-            "query": [],
-            "response": [
-                "float"
-            ],
-            "set": null
-        },
         "MEAS:VOLT": {
-            "query": [],
-            "response": [
-                "float"
-            ],
-            "set": null
-        },
-        "MEAS:VOLT2": {
-            "help": "Query the average DC voltage at the load input",
             "query": [],
             "response": [
                 "float"
@@ -120,15 +176,186 @@
                 }
             ]
         },
-        "VOLT": {
-            "help": "Set or read output voltage level",
+        "POW": {
+            "help": "This command sets the power of the load when operating in constant power mode.",
             "query": [],
             "response": [
                 "float"
             ],
             "set": [
                 {
-                    "required": true,
+                    "range": [
+                        0.0,
+                        1200.0
+                    ],
+                    "requried": true,
+                    "type": "float"
+                }
+            ]
+        },
+        "POW:RANG": {
+            "help": "This command sets the power range of the load. This limits the settable range for power.",
+            "query": [],
+            "response": [
+                "float"
+            ],
+            "set": [
+                {
+                    "range": [
+                        0.0,
+                        1200.0
+                    ],
+                    "requried": true,
+                    "type": "float"
+                }
+            ]
+        },
+        "PROT:CLE": {
+            "help": "This command clears the latch that disables the input when a protection condition such as overvoltage(OV) or overcurrent (OC) is detected. All conditions that generated the fault must be removed beforethe latch can be cleared. The input is then restored to the state it was in before the fault conditionoccurred.",
+            "query": null,
+            "response": null,
+            "set": []
+        },
+        "REM:SENS": {
+            "help": "This command is used to select the remote measure mode for the load.",
+            "query": [],
+            "response": [
+                "str"
+            ],
+            "set": [
+                {
+                    "requried": true,
+                    "type": "bool"
+                }
+            ]
+        },
+        "RES": {
+            "help": "This command sets the resistance of the electronic load when operating in constant resistance mode.",
+            "query": [],
+            "response": [
+                "float"
+            ],
+            "set": [
+                {
+                    "range": [
+                        0.1,
+                        7500.0
+                    ],
+                    "requried": true,
+                    "type": "float"
+                }
+            ]
+        },
+        "RES:RANG": {
+            "help": "This command sets the resistance range of the electronic load module. This limits the value theresistance can be set to.When you program a range value, the electronic load automatically selects the range that correspondsto the value that you program. If the value falls in a region where ranges overlap, the electronic load55selects the range with the highest resolution.",
+            "query": [],
+            "response": [
+                "float"
+            ],
+            "set": [
+                {
+                    "range": [
+                        0.1,
+                        7500.0
+                    ],
+                    "requried": true,
+                    "type": "float"
+                }
+            ]
+        },
+        "SYST:CLE": {
+            "help": "This action command is used to clear the Error Queue of messages.",
+            "query": null,
+            "response": null,
+            "set": []
+        },
+        "SYST:ERR": {
+            "help": "This query returns the next error number followed by its corresponding error message string from theremote programming error queue. The queue is a FIFO (first-in, first-out) buffer that stores errors asthey occur. As it is read, each error is removed from the queue. When all errors have been read, thequery returns \u201c0, No Error\u201d. If more errors are accumulated than the queue can hold, the last error inthe queue is \u201c-350, Too Many Errors\u201d.",
+            "query": [],
+            "response": [
+                "int",
+                "str"
+            ],
+            "set": null
+        },
+        "SYST:LOC": {
+            "help": "This command places the electronic load in local mode during RS-232 operation. The front panel keysare functional.",
+            "query": null,
+            "response": null,
+            "set": []
+        },
+        "SYST:PRES": {
+            "help": "This command returns the instrument to states optimized for front panel operation.",
+            "query": null,
+            "response": null,
+            "set": []
+        },
+        "SYST:REM": {
+            "help": "This command places the electronic load in remote mode during RS-232 operation. This disables allfront panel keys except the Local key. Pressing the Local key while in the remote state returns the frontpanel to the local state.",
+            "query": null,
+            "response": null,
+            "set": []
+        },
+        "TRIG:SOUR": {
+            "help": "This command selects the trigger source.",
+            "query": [],
+            "response": [
+                "str"
+            ],
+            "set": [
+                {
+                    "requried": true,
+                    "type": "str",
+                    "values": [
+                        "BUS",
+                        "EXT",
+                        "HOLD",
+                        "MANU",
+                        "TIM"
+                    ]
+                }
+            ]
+        },
+        "TRIG:TIM": {
+            "help": "This command specifies the period of the triggers generated by the internal trigger generator. ",
+            "query": [
+                {
+                    "requried": false,
+                    "type": "str",
+                    "values": [
+                        "MIN",
+                        "MAX",
+                        "DEF"
+                    ]
+                }
+            ],
+            "response": [
+                "float"
+            ],
+            "set": [
+                {
+                    "range": [
+                        1.0,
+                        999.99
+                    ],
+                    "requried": true,
+                    "type": "float"
+                }
+            ]
+        },
+        "VOLT": {
+            "help": "This command sets the voltage that the electronic load will regulate when operating in constantvoltage (CV) mode.",
+            "query": [],
+            "response": [
+                "float"
+            ],
+            "set": [
+                {
+                    "range": [
+                        0.0,
+                        500.0
+                    ],
+                    "requried": true,
                     "type": "float"
                 }
             ]
